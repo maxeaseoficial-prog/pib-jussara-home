@@ -1,5 +1,5 @@
 import { ArrowRight, BookOpen, HandHeart, Users, Sunrise } from "lucide-react";
-import facade from "@/assets/facade.jpg";
+import facade from "@/assets/facade.avif";
 import { Reveal } from "./Reveal";
 
 const principles = [
@@ -16,12 +16,14 @@ export function Hero() {
         <img
           src={facade}
           alt="Fachada da Primeira Igreja Batista de Jussara ao final da tarde"
-          width={1600}
-          height={1200}
-          className="h-full w-full object-cover object-center"
+          width={1672}
+          height={941}
+          fetchPriority="high"
+          decoding="async"
+          className="h-full w-full object-cover object-[72%_center] sm:object-[65%_center] lg:object-[55%_center]"
         />
-        <div className="absolute inset-0 bg-green-950/80" />
-        <div className="absolute inset-0 bg-gradient-to-r from-green-950 via-green-950/80 to-transparent" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,44,30,0.96)_0%,rgba(2,44,30,0.90)_52%,rgba(2,44,30,0.72)_78%,rgba(2,44,30,0.54)_100%)] sm:bg-[linear-gradient(90deg,rgba(2,44,30,0.98)_0%,rgba(2,44,30,0.94)_38%,rgba(2,44,30,0.70)_62%,rgba(2,44,30,0.26)_82%,rgba(2,44,30,0.08)_100%)] lg:bg-[linear-gradient(90deg,rgba(2,44,30,0.98)_0%,rgba(2,44,30,0.94)_24%,rgba(2,44,30,0.76)_42%,rgba(2,44,30,0.38)_58%,rgba(2,44,30,0.10)_72%,rgba(2,44,30,0)_86%)]" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(2,44,30,0.40)_0%,rgba(2,44,30,0.12)_60%,rgba(2,44,30,0)_100%)]" />
       </div>
 
       <div className="mx-auto max-w-[1360px] px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24">
@@ -71,7 +73,10 @@ export function Hero() {
         <Reveal delay={340}>
           <ul className="grid gap-px overflow-hidden rounded-3xl bg-border shadow-[0_30px_60px_-40px_rgba(2,44,30,0.55)] sm:grid-cols-2 lg:grid-cols-4">
             {principles.map(({ icon: Icon, strong, rest }) => (
-              <li key={strong} className="bg-surface p-7 transition-colors duration-300 hover:bg-surface-soft">
+              <li
+                key={strong}
+                className="bg-surface p-7 transition-colors duration-300 hover:bg-surface-soft"
+              >
                 <Icon className="h-6 w-6 text-green-700" strokeWidth={1.5} />
                 <p className="mt-5 text-[0.95rem] leading-snug text-text-secondary">
                   <span className="block font-extrabold text-text-primary">{strong}</span>
