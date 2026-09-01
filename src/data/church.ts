@@ -13,7 +13,7 @@ export const churchConfig = {
   phone: "(62) 98171-7501",
   whatsapp: "(62) 00000-0000", // TODO: substituir
   email: "contato@pibjussara.com.br", // TODO: substituir
-  instagram: "https://instagram.com/",
+  instagram: "https://www.instagram.com/pibjuss/",
   youtube: "https://youtube.com/",
   mapsQuery: "Primeira Igreja Batista de Jussara GO",
   services: [
