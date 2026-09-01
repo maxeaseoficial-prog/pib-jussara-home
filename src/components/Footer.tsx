@@ -1,4 +1,4 @@
-import { Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { churchConfig, navItems } from "@/data/church";
 
@@ -42,6 +42,15 @@ export function Footer() {
                 className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition-colors hover:border-brand-green hover:text-white"
               >
                 <Youtube className="h-4 w-4" strokeWidth={1.75} />
+              </a>
+              <a
+                href={churchConfig.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook da PIB Jussara"
+                className="grid h-10 w-10 place-items-center rounded-full border border-white/15 transition-colors hover:border-brand-green hover:text-white"
+              >
+                <Facebook className="h-4 w-4" strokeWidth={1.75} />
               </a>
             </div>
           </div>
