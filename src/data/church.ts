@@ -10,7 +10,7 @@ export const churchConfig = {
     // TODO: substituir pelo endereço oficial completo
     full: "Rua Principal, s/n — Centro, Jussara - GO, 76270-000",
   },
-  phone: "(62) 0000-0000", // TODO: substituir pelo telefone oficial
+  phone: "(62) 98171-7501",
   whatsapp: "(62) 00000-0000", // TODO: substituir
   email: "contato@pibjussara.com.br", // TODO: substituir
   instagram: "https://instagram.com/",

@@ -41,8 +41,8 @@ function Index() {
         <Mission />
         <Transmissions />
         <Community />
-        <VisitUs />
         <FinalCTA />
+        <VisitUs />
       </main>
       <Footer />
     </div>
