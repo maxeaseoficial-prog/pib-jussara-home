@@ -1,5 +1,5 @@
 import { ArrowRight, BookOpen, HandHeart, Users, Sunrise } from "lucide-react";
-import facade from "@/assets/facade.avif";
+import facade from "@/assets/facade.jpg";
 import { Reveal } from "./Reveal";
 
 const principles = [
@@ -11,8 +11,8 @@ const principles = [
 
 export function Hero() {
   return (
-    <section id="inicio" className="relative isolate bg-green-950 pt-32 sm:pt-40 lg:pt-48">
-      <div className="absolute inset-0 -z-10">
+    <section id="inicio" className="relative isolate pt-32 sm:pt-40 lg:pt-48">
+      <div className="pointer-events-none absolute inset-0 z-0 bg-green-950">
         <img
           src={facade}
           alt="Fachada da Primeira Igreja Batista de Jussara ao final da tarde"
@@ -26,7 +26,7 @@ export function Hero() {
         <div className="absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(2,44,30,0.40)_0%,rgba(2,44,30,0.12)_60%,rgba(2,44,30,0)_100%)]" />
       </div>
 
-      <div className="mx-auto max-w-[1360px] px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24">
+      <div className="relative z-10 mx-auto max-w-[1360px] px-5 pb-16 sm:px-8 lg:px-12 lg:pb-24">
         <div className="max-w-3xl">
           <Reveal>
             <p className="eyebrow text-brand-lime">Bem-vindo à PIB Jussara</p>
@@ -69,7 +69,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
+      <div className="relative z-10 mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
         <Reveal delay={340}>
           <ul className="grid gap-px overflow-hidden rounded-3xl bg-border shadow-[0_30px_60px_-40px_rgba(2,44,30,0.55)] sm:grid-cols-2 lg:grid-cols-4">
             {principles.map(({ icon: Icon, strong, rest }) => (
@@ -87,7 +87,7 @@ export function Hero() {
           </ul>
         </Reveal>
       </div>
-      <div className="h-14 bg-background sm:h-20" aria-hidden="true" />
+      <div className="relative z-10 h-14 bg-background sm:h-20" aria-hidden="true" />
     </section>
   );
 }
