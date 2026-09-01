@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import logo from "@/assets/logo.png.asset.json";
+import logo from "@/assets/logo.png";
 import { navItems, churchConfig } from "@/data/church";
 
 export function Header() {
@@ -50,7 +50,7 @@ export function Header() {
       <div className="mx-auto grid max-w-[1360px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:px-12">
         <a href="#inicio" className="flex min-w-0 items-center gap-3" aria-label="Ir para o início">
           <img
-            src={logo.url}
+            src={logo}
             alt={`Logotipo da ${churchConfig.name}`}
             width={48}
             height={48}

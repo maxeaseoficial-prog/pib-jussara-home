@@ -1,5 +1,5 @@
 import { Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import logo from "@/assets/logo.png.asset.json";
+import logo from "@/assets/logo.png";
 import { churchConfig, navItems } from "@/data/church";
 
 export function Footer() {
@@ -12,7 +12,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3">
               <img
-                src={logo.url}
+                src={logo}
                 alt={`Logotipo da ${churchConfig.name}`}
                 width={48}
                 height={48}
@@ -82,13 +82,19 @@ export function Footer() {
               </li>
               <li className="flex gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
-                <a href={`tel:${churchConfig.phone.replace(/\D/g, "")}`} className="hover:text-brand-lime">
+                <a
+                  href={`tel:${churchConfig.phone.replace(/\D/g, "")}`}
+                  className="hover:text-brand-lime"
+                >
                   {churchConfig.phone}
                 </a>
               </li>
               <li className="flex min-w-0 gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
-                <a href={`mailto:${churchConfig.email}`} className="break-words hover:text-brand-lime">
+                <a
+                  href={`mailto:${churchConfig.email}`}
+                  className="break-words hover:text-brand-lime"
+                >
                   {churchConfig.email}
                 </a>
               </li>
