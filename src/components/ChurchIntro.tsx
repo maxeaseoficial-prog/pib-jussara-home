@@ -51,7 +51,7 @@ export function ChurchIntro() {
           <div className="overflow-hidden rounded-[2rem] lg:mt-16">
             <img
               src={interior}
-              alt="Pregação no templo da PIB Jussara"
+              alt="Congregação reunida no templo da PIB Jussara"
               loading="lazy"
               width={1122}
               height={1402}

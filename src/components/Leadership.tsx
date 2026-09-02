@@ -1,4 +1,4 @@
-import pastor from "@/assets/pastor-placeholder.jpg";
+import pastor from "@/assets/pastor.jpg";
 import { churchConfig } from "@/data/church";
 import { Reveal } from "./Reveal";
 
@@ -10,15 +10,12 @@ export function Leadership() {
           <figure className="overflow-hidden rounded-[2rem]">
             <img
               src={pastor}
-              alt="Espaço reservado para a fotografia oficial do Pr. Divino Ferreira"
+              alt="Pr. Divino Ferreira pregando no templo da PIB Jussara"
               loading="lazy"
-              width={1200}
-              height={1500}
+              width={1122}
+              height={1402}
               className="aspect-[4/5] w-full object-cover"
             />
-            <figcaption className="bg-green-950 px-6 py-4 text-xs text-white/50">
-              Placeholder — substituir pela fotografia oficial do pastor.
-            </figcaption>
           </figure>
         </Reveal>
 
