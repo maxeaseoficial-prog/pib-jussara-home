@@ -51,17 +51,12 @@ export function ChurchIntro() {
           <div className="overflow-hidden rounded-[2rem] lg:mt-16">
             <img
               src={interior}
-              alt="Interior do templo da PIB Jussara com bancos de madeira e luz natural"
+              alt="Pregação no templo da PIB Jussara"
               loading="lazy"
-              width={1200}
-              height={1500}
+              width={1122}
+              height={1402}
               className="aspect-[4/5] w-full object-cover"
             />
-          </div>
-          <div className="mt-5 ml-auto max-w-xs rounded-2xl bg-green-900 p-6 text-white/85 lg:-mt-14 lg:mr-6">
-            <p className="text-sm leading-relaxed">
-              Cultos, discipulado, ministérios e ações sociais durante toda a semana em Jussara - GO.
-            </p>
           </div>
         </Reveal>
       </div>
