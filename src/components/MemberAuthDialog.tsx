@@ -248,11 +248,11 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
 
               <DialogHeader className="space-y-2 text-left">
                 <DialogTitle className="text-3xl font-extrabold tracking-[-0.025em] text-green-950 sm:text-4xl">
-                  {mode === "login" ? "Acesse sua conta" : "Crie sua conta"}
+                  {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
                 </DialogTitle>
                 <DialogDescription className="max-w-[46ch] text-sm leading-6 text-text-secondary">
                   {mode === "login"
-                    ? "Use seu e-mail e senha para continuar como membro."
+                    ? "Acesse sua conta de membro."
                     : "Cadastre seus dados para se identificar como membro da PIB Jussara."}
                 </DialogDescription>
               </DialogHeader>
@@ -438,20 +438,20 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
                         Criando conta…
                       </>
                     ) : (
-                      "Criar conta"
+                      "Criar minha conta"
                     )}
                   </button>
                 </form>
               )}
 
               <p className="mt-6 text-center text-sm text-text-secondary">
-                {mode === "login" ? "Ainda não tem uma conta?" : "Já tem uma conta?"}{" "}
+                {mode === "login" ? "Ainda não possui uma conta?" : "Já possui uma conta?"}{" "}
                 <button
                   type="button"
                   onClick={() => changeMode(mode === "login" ? "signup" : "login")}
                   className="font-bold text-green-800 underline decoration-brand-green/50 underline-offset-4 transition-colors hover:text-green-700"
                 >
-                  {mode === "login" ? "Criar conta" : "Entrar"}
+                  {mode === "login" ? "Cadastre-se" : "Entrar"}
                 </button>
               </p>
             </div>
