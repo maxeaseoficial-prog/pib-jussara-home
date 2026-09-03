@@ -12,13 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-function MemberAction({
-  onGuestClick,
-  fullWidth = false,
-}: {
-  onGuestClick: () => void;
-  fullWidth?: boolean;
-}) {
+function MemberAction({ onGuestClick }: { onGuestClick: () => void }) {
   const { member, isLoading, signOut } = useAuth();
   const [accountOpen, setAccountOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -27,7 +21,7 @@ function MemberAction({
   if (isLoading) {
     return (
       <div
-        className={`${fullWidth ? "w-full" : "w-36"} h-11 animate-pulse rounded-full bg-white/10`}
+        className="h-11 w-20 animate-pulse rounded-full bg-white/10 sm:w-24 lg:w-36"
         aria-label="Verificando sessão de membro"
         role="status"
       />
@@ -39,10 +33,11 @@ function MemberAction({
       <button
         type="button"
         onClick={onGuestClick}
-        className={`${fullWidth ? "w-full" : ""} inline-flex h-11 items-center justify-center gap-2 rounded-full bg-brand-lime px-5 text-sm font-extrabold text-green-950 shadow-[0_7px_20px_rgba(120,221,27,0.2)] transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_10px_24px_rgba(255,255,255,0.14)]`}
+        className="inline-flex h-11 items-center justify-center gap-1.5 rounded-full bg-brand-lime px-3 text-xs font-extrabold text-green-950 shadow-[0_7px_20px_rgba(120,221,27,0.2)] transition-[background-color,transform,box-shadow] hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_10px_24px_rgba(255,255,255,0.14)] sm:px-4 sm:text-sm lg:gap-2 lg:px-5"
       >
         <UserRound className="h-4 w-4" strokeWidth={2} aria-hidden="true" />
-        Sou membro
+        <span className="lg:hidden">Entrar</span>
+        <span className="hidden lg:inline">Sou membro</span>
       </button>
     );
   }
@@ -72,16 +67,20 @@ function MemberAction({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className={`${fullWidth ? "w-full" : "max-w-52"} inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 text-sm font-bold text-white transition-colors hover:bg-white/16`}
+          className="inline-flex h-11 max-w-28 items-center justify-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 text-xs font-bold text-white transition-colors hover:bg-white/16 sm:max-w-40 sm:gap-2 sm:px-4 sm:text-sm lg:max-w-52"
           aria-label={`Abrir menu da conta de ${member.fullName}`}
         >
-          <UserRound className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden="true" />
+          <UserRound
+            className="hidden h-4 w-4 shrink-0 sm:block"
+            strokeWidth={2}
+            aria-hidden="true"
+          />
           <span className="truncate">Olá, {member.firstName}</span>
           <ChevronDown className="h-4 w-4 shrink-0 text-white/70" aria-hidden="true" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        align={fullWidth ? "start" : "end"}
+        align="end"
         sideOffset={10}
         className="w-[min(19rem,calc(100vw-2rem))] rounded-xl border-0 bg-white p-2 text-text-primary shadow-[0_18px_48px_rgba(2,44,30,0.24)]"
       >
@@ -164,10 +163,10 @@ export function Header() {
             : "border-b border-transparent py-6"
         }`}
       >
-        <div className="mx-auto grid max-w-[1360px] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:px-12">
+        <div className="mx-auto grid max-w-[1360px] grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 px-5 sm:gap-3 sm:px-8 lg:gap-4 lg:px-12">
           <a
             href="#inicio"
-            className="flex min-w-0 items-center gap-3"
+            className="flex min-w-0 items-center gap-2 sm:gap-3"
             aria-label="Ir para o início"
           >
             <img
@@ -175,13 +174,13 @@ export function Header() {
               alt={`Logotipo da ${churchConfig.name}`}
               width={48}
               height={48}
-              className="h-11 w-11 shrink-0 object-contain"
+              className="h-10 w-10 shrink-0 object-contain min-[360px]:h-11 min-[360px]:w-11"
             />
             <span className="min-w-0 leading-tight">
-              <span className="block truncate text-sm font-extrabold tracking-tight text-white">
+              <span className="block truncate text-xs font-extrabold tracking-tight text-white min-[360px]:text-sm">
                 PIB Jussara
               </span>
-              <span className="block truncate text-[11px] tracking-wide text-white/60">
+              <span className="hidden truncate text-[11px] tracking-wide text-white/60 min-[360px]:block">
                 Primeira Igreja Batista
               </span>
             </span>
@@ -203,7 +202,7 @@ export function Header() {
             </ul>
           </nav>
 
-          <div className="hidden lg:block">
+          <div className="justify-self-end">
             <MemberAction onGuestClick={() => setAuthOpen(true)} />
           </div>
 
@@ -213,13 +212,15 @@ export function Header() {
             className="grid h-11 w-11 place-items-center rounded-full border border-white/25 text-white transition-colors hover:bg-white/10 lg:hidden"
             aria-label="Abrir menu"
             aria-expanded={open}
+            aria-controls="mobile-navigation"
           >
-            <Menu className="h-5 w-5" strokeWidth={1.75} />
+            <Menu className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
       </header>
 
       <div
+        id="mobile-navigation"
         className={`fixed inset-0 z-50 overflow-y-auto bg-green-950 transition-opacity duration-300 lg:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -234,7 +235,7 @@ export function Header() {
             className="grid h-11 w-11 place-items-center rounded-full border border-white/25 text-white"
             aria-label="Fechar menu"
           >
-            <X className="h-5 w-5" strokeWidth={1.75} />
+            <X className="h-5 w-5" strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
         <nav aria-label="Navegação mobile" className="px-5 pt-6 sm:px-8">
@@ -251,15 +252,6 @@ export function Header() {
               </li>
             ))}
           </ul>
-          <div className="mt-8">
-            <MemberAction
-              fullWidth
-              onGuestClick={() => {
-                setOpen(false);
-                setAuthOpen(true);
-              }}
-            />
-          </div>
         </nav>
       </div>
 
