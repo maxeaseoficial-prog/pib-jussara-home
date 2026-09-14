@@ -1,6 +1,6 @@
 import { ArrowUpRight, Play } from "lucide-react";
 import { YouTubeVideo } from "./YouTubeVideo";
-import { featuredVideoId, messages } from "@/data/messages";
+import { featuredVideoId, featuredVideoTitle, messages } from "@/data/messages";
 import { Reveal } from "./Reveal";
 import { useSiteSettings } from "@/site/useSiteSettings";
 import { youtubeVideoIdFromUrl } from "@/site/site-settings";
@@ -34,7 +34,11 @@ export function Transmissions() {
         <Reveal delay={160} className="mt-12">
           <YouTubeVideo
             videoId={transmissionVideoId}
-            title="Último culto transmitido — PIB Jussara"
+            title={
+              transmissionVideoId === featuredVideoId
+                ? featuredVideoTitle
+                : "Vídeo em destaque — PIB Jussara"
+            }
           />
         </Reveal>
 

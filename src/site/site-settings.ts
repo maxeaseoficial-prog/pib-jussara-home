@@ -25,15 +25,32 @@ export const fallbackSiteSettings: SiteSettings = {
   updatedAt: null,
 };
 
+const legacyYoutubeVideoId = "dQw4w9WgXcQ";
+
+function isLegacyYoutubeChannelUrl(value: string) {
+  try {
+    const url = new URL(value.trim());
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    return (host === "youtube.com" || host === "youtu.be") && url.pathname === "/";
+  } catch {
+    return false;
+  }
+}
+
 export function siteSettingsFromRow(row: SiteSettingsRow): SiteSettings {
+  const storedYoutubeVideoId = youtubeVideoIdFromUrl(row.youtube_live_url);
+
   return {
     phone: row.phone,
     institutionalEmail: row.institutional_email,
     fullAddress: row.full_address,
     instagramUrl: row.instagram_url,
     facebookUrl: row.facebook_url,
-    youtubeUrl: row.youtube_url,
-    youtubeLiveUrl: row.youtube_live_url,
+    youtubeUrl: isLegacyYoutubeChannelUrl(row.youtube_url) ? churchConfig.youtube : row.youtube_url,
+    youtubeLiveUrl:
+      storedYoutubeVideoId === legacyYoutubeVideoId
+        ? churchConfig.youtubeLiveUrl
+        : row.youtube_live_url,
     updatedAt: row.updated_at,
   };
 }

@@ -14,8 +14,8 @@ export const churchConfig = {
   whatsapp: "(62) 00000-0000", // TODO: substituir
   email: "contato@pibjussara.com.br", // TODO: substituir
   instagram: "https://www.instagram.com/pibjuss/",
-  youtube: "https://youtube.com/",
-  youtubeLiveUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  youtube: "https://www.youtube.com/@primeiraigrejabatistajussa4897",
+  youtubeLiveUrl: "https://www.youtube.com/watch?v=6wbCaXoq6cM",
   facebook: "https://www.facebook.com/share/1DVrQb5V4T/?mibextid=wwXIfr",
   mapsQuery: "Primeira Igreja Batista de Jussara GO",
   services: [

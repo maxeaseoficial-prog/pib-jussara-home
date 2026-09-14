@@ -6,30 +6,27 @@ export type Message = {
   duration?: string;
 };
 
-// Vídeo principal — substituir pelo ID do último culto transmitido.
-export const featuredVideoId = "dQw4w9WgXcQ";
+export const featuredVideoId = "6wbCaXoq6cM";
+export const featuredVideoTitle = "1º Louvorzão — Mini Vigília da Juventude Luz do Mundo";
 
-// Dados provisórios (mock) — substituir pelos vídeos oficiais do canal.
+// Conteúdo publicado no canal oficial da PIB Jussara.
 export const messages: Message[] = [
   {
-    videoId: "dQw4w9WgXcQ",
-    title: "A fé que sustenta em tempos difíceis",
-    preacher: "Pr. Divino Ferreira",
-    date: "24 de agosto de 2026",
-    duration: "48 min",
+    videoId: "6wbCaXoq6cM",
+    title: "1º Louvorzão — Mini Vigília da Juventude Luz do Mundo",
+    preacher: "PIB Jussara",
+    date: "5 de fevereiro de 2023",
   },
   {
-    videoId: "dQw4w9WgXcQ",
-    title: "O valor da comunhão na casa de Deus",
-    preacher: "Pr. Divino Ferreira",
-    date: "17 de agosto de 2026",
-    duration: "52 min",
+    videoId: "V9B3TBVWuGY",
+    title: "Contagem regressiva para o nosso Encontro Kids 2",
+    preacher: "PIB Jussara",
+    date: "3 de outubro de 2022",
   },
   {
-    videoId: "dQw4w9WgXcQ",
-    title: "Servir com amor e propósito",
-    preacher: "Pr. Divino Ferreira",
-    date: "10 de agosto de 2026",
-    duration: "45 min",
+    videoId: "V_zjjidnmRU",
+    title: "Transmissão ao vivo de PIB Jussara",
+    preacher: "PIB Jussara",
+    date: "14 de março de 2021",
   },
 ];
