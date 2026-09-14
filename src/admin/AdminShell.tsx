@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ComponentType } from "react";
+import { useEffect, useState, type ComponentType } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Building2,
@@ -11,6 +12,12 @@ import {
   UsersRound,
 } from "lucide-react";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  adminQueryKeys,
+  loadAdminMemberCount,
+  loadAdminMembers,
+  loadPersistentSiteSettings,
+} from "@/admin/admin-data";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -134,7 +141,25 @@ function SidebarContent({ onNavigate }: { onNavigate?: (() => void) | undefined 
 
 export function AdminShell() {
   const { member } = useAuth();
+  const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    void Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: adminQueryKeys.memberCount,
+        queryFn: ({ signal }) => loadAdminMemberCount(signal),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: adminQueryKeys.siteSettings,
+        queryFn: ({ signal }) => loadPersistentSiteSettings(signal),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: adminQueryKeys.members(""),
+        queryFn: ({ signal }) => loadAdminMembers("", signal),
+      }),
+    ]);
+  }, [queryClient]);
 
   return (
     <div className="admin-shell min-h-screen bg-background text-text-primary lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">

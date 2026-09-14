@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Phone, RefreshCw, Search, UserRound, UsersRound } from "lucide-react";
 import { AdminPageHeader } from "@/admin/AdminPageHeader";
-import { loadAdminMemberCount, loadAdminMembers } from "@/admin/admin-data";
+import { adminQueryKeys, loadAdminMemberCount, loadAdminMembers } from "@/admin/admin-data";
 import { formatBrazilianPhone } from "@/auth/member-auth";
 import { Input } from "@/components/ui/input";
 
@@ -26,12 +26,12 @@ function AdminMembers() {
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search.trim());
   const members = useQuery({
-    queryKey: ["admin", "members", deferredSearch],
-    queryFn: () => loadAdminMembers(deferredSearch),
+    queryKey: adminQueryKeys.members(deferredSearch),
+    queryFn: ({ signal }) => loadAdminMembers(deferredSearch, signal),
   });
   const memberCount = useQuery({
-    queryKey: ["admin", "member-count"],
-    queryFn: loadAdminMemberCount,
+    queryKey: adminQueryKeys.memberCount,
+    queryFn: ({ signal }) => loadAdminMemberCount(signal),
   });
 
   const resultCount = members.data?.length ?? 0;

@@ -3,7 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, LoaderCircle, RefreshCw, Save } from "lucide-react";
 import { AdminPageHeader } from "@/admin/AdminPageHeader";
-import { loadPersistentSiteSettings, savePersistentSiteSettings } from "@/admin/admin-data";
+import {
+  adminQueryKeys,
+  loadPersistentSiteSettings,
+  savePersistentSiteSettings,
+} from "@/admin/admin-data";
 import { isValidEmail, toCanonicalBrazilianPhone } from "@/auth/member-auth";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -109,8 +113,8 @@ function AdminSiteSettings() {
   const queryClient = useQueryClient();
   const { refresh: refreshPublicSettings } = useSiteSettings();
   const settingsQuery = useQuery({
-    queryKey: ["site-settings", "admin"],
-    queryFn: loadPersistentSiteSettings,
+    queryKey: adminQueryKeys.siteSettings,
+    queryFn: ({ signal }) => loadPersistentSiteSettings(signal),
   });
   const [form, setForm] = useState<SettingsForm>(emptyForm);
   const [errors, setErrors] = useState<SettingsErrors>({});
@@ -154,7 +158,7 @@ function AdminSiteSettings() {
         youtube_url: normalized.youtubeUrl,
         youtube_live_url: normalizedLiveUrl,
       });
-      queryClient.setQueryData(["site-settings", "admin"], saved);
+      queryClient.setQueryData(adminQueryKeys.siteSettings, saved);
       setForm(formFromRow(saved));
       await refreshPublicSettings();
       setNotice({ tone: "success", text: "Alterações salvas com sucesso." });

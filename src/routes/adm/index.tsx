@@ -2,7 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Building2, Mail, MapPin, Phone, RefreshCw, UsersRound } from "lucide-react";
 import { AdminPageHeader } from "@/admin/AdminPageHeader";
-import { loadAdminMemberCount, loadPersistentSiteSettings } from "@/admin/admin-data";
+import {
+  adminQueryKeys,
+  loadAdminMemberCount,
+  loadPersistentSiteSettings,
+} from "@/admin/admin-data";
 
 export const Route = createFileRoute("/adm/")({
   component: AdminOverview,
@@ -10,12 +14,12 @@ export const Route = createFileRoute("/adm/")({
 
 function AdminOverview() {
   const memberCount = useQuery({
-    queryKey: ["admin", "member-count"],
-    queryFn: loadAdminMemberCount,
+    queryKey: adminQueryKeys.memberCount,
+    queryFn: ({ signal }) => loadAdminMemberCount(signal),
   });
   const siteSettings = useQuery({
-    queryKey: ["site-settings", "admin"],
-    queryFn: loadPersistentSiteSettings,
+    queryKey: adminQueryKeys.siteSettings,
+    queryFn: ({ signal }) => loadPersistentSiteSettings(signal),
   });
 
   return (
