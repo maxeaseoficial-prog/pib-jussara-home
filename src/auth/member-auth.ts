@@ -8,6 +8,11 @@ export type SignUpValues = {
 
 export type SignUpErrors = Partial<Record<keyof SignUpValues, string>>;
 
+type AuthErrorLike = {
+  code?: string | undefined;
+  status?: number | undefined;
+};
+
 export function normalizeFullName(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
@@ -42,6 +47,33 @@ export function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+export function signUpErrorMessage(error: AuthErrorLike | null) {
+  switch (error?.code) {
+    case "weak_password":
+      return "Escolha uma senha forte e exclusiva, evitando palavras ou sequências comuns.";
+    case "email_exists":
+    case "user_already_exists":
+      return "Já existe uma conta com este e-mail. Volte para Entrar e use sua senha.";
+    case "email_address_invalid":
+    case "validation_failed":
+      return "Confira o e-mail e os demais dados informados antes de tentar novamente.";
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit":
+      return "Muitas tentativas foram feitas. Aguarde alguns minutos e tente novamente.";
+    case "captcha_failed":
+      return "Não foi possível concluir a verificação de segurança. Atualize a página e tente novamente.";
+    case "signup_disabled":
+    case "email_provider_disabled":
+      return "Novos cadastros estão temporariamente indisponíveis. Entre em contato com a igreja.";
+    case "unexpected_failure":
+      return "O servidor não conseguiu concluir o cadastro. Tente novamente em alguns minutos.";
+    default:
+      return error?.status === 429
+        ? "Muitas tentativas foram feitas. Aguarde alguns minutos e tente novamente."
+        : "Não foi possível criar sua conta. Confira os dados e tente novamente.";
+  }
+}
+
 export function validateSignUp(values: SignUpValues): SignUpErrors {
   const errors: SignUpErrors = {};
   const nameParts = normalizeFullName(values.fullName).split(" ").filter(Boolean);
@@ -51,8 +83,8 @@ export function validateSignUp(values: SignUpValues): SignUpErrors {
     errors.phone = "Informe um telefone válido com DDD.";
   }
   if (!isValidEmail(values.email)) errors.email = "Informe um e-mail válido.";
-  if (values.password.length < 6) {
-    errors.password = "Use uma senha com pelo menos 6 caracteres.";
+  if (values.password.length < 8) {
+    errors.password = "Use uma senha com pelo menos 8 caracteres.";
   }
   if (!values.confirmPassword) {
     errors.confirmPassword = "Confirme sua senha.";

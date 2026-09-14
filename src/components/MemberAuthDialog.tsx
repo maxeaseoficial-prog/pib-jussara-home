@@ -392,7 +392,7 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
                       id="signup-password"
                       label="Senha"
                       error={signUpErrors.password}
-                      hint="Mínimo de 6 caracteres."
+                      hint="Mínimo de 8 caracteres. Use uma senha forte e exclusiva."
                     >
                       <PasswordInput
                         id="signup-password"

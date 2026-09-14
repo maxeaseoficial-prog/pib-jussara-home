@@ -185,6 +185,45 @@
     outline-offset: 3px;
     border-radius: 4px;
   }
+
+  .admin-shell,
+  .admin-auth {
+    caret-color: var(--green-700);
+  }
+
+  .admin-shell ::selection,
+  .admin-auth ::selection {
+    background-color: var(--brand-lime);
+    color: var(--green-950);
+  }
+
+  html:has(.admin-shell),
+  html:has(.admin-auth),
+  .admin-shell * {
+    scrollbar-color: var(--green-700) var(--surface-soft);
+    scrollbar-width: thin;
+  }
+
+  html:has(.admin-shell)::-webkit-scrollbar,
+  html:has(.admin-auth)::-webkit-scrollbar,
+  .admin-shell *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  html:has(.admin-shell)::-webkit-scrollbar-track,
+  html:has(.admin-auth)::-webkit-scrollbar-track,
+  .admin-shell *::-webkit-scrollbar-track {
+    background: var(--surface-soft);
+  }
+
+  html:has(.admin-shell)::-webkit-scrollbar-thumb,
+  html:has(.admin-auth)::-webkit-scrollbar-thumb,
+  .admin-shell *::-webkit-scrollbar-thumb {
+    border: 2px solid var(--surface-soft);
+    border-radius: 999px;
+    background: var(--green-700);
+  }
 }
 
 @utility reveal {

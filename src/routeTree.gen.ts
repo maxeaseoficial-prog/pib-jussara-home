@@ -10,33 +10,86 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdmRouteRouteImport } from './routes/adm/route'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdmIndexRouteImport } from './routes/adm/index'
+import { Route as AdmMembrosRouteImport } from './routes/adm/membros'
+import { Route as AdmSiteRouteImport } from './routes/adm/site'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdmRouteRoute = AdmRouteRouteImport.update({
+  id: '/adm',
+  path: '/adm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdmIndexRoute = AdmIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdmRouteRoute,
+} as any)
+const AdmMembrosRoute = AdmMembrosRouteImport.update({
+  id: '/membros',
+  path: '/membros',
+  getParentRoute: () => AdmRouteRoute,
+} as any)
+const AdmSiteRoute = AdmSiteRouteImport.update({
+  id: '/site',
+  path: '/site',
+  getParentRoute: () => AdmRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/adm': typeof AdmRouteRouteWithChildren
+  '/admin': typeof AdminRoute
+  '/adm/membros': typeof AdmMembrosRoute
+  '/adm/site': typeof AdmSiteRoute
+  '/adm/': typeof AdmIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/adm/membros': typeof AdmMembrosRoute
+  '/adm/site': typeof AdmSiteRoute
+  '/adm': typeof AdmIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/adm': typeof AdmRouteRouteWithChildren
+  '/admin': typeof AdminRoute
+  '/adm/membros': typeof AdmMembrosRoute
+  '/adm/site': typeof AdmSiteRoute
+  '/adm/': typeof AdmIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/adm' | '/admin' | '/adm/membros' | '/adm/site' | '/adm/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/admin' | '/adm/membros' | '/adm/site' | '/adm'
+  id:
+    | '__root__'
+    | '/'
+    | '/adm'
+    | '/admin'
+    | '/adm/membros'
+    | '/adm/site'
+    | '/adm/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdmRouteRoute: typeof AdmRouteRouteWithChildren
+  AdminRoute: typeof AdminRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +101,64 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/adm': {
+      id: '/adm'
+      path: '/adm'
+      fullPath: '/adm'
+      preLoaderRoute: typeof AdmRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adm/': {
+      id: '/adm/'
+      path: '/'
+      fullPath: '/adm/'
+      preLoaderRoute: typeof AdmIndexRouteImport
+      parentRoute: typeof AdmRouteRoute
+    }
+    '/adm/membros': {
+      id: '/adm/membros'
+      path: '/membros'
+      fullPath: '/adm/membros'
+      preLoaderRoute: typeof AdmMembrosRouteImport
+      parentRoute: typeof AdmRouteRoute
+    }
+    '/adm/site': {
+      id: '/adm/site'
+      path: '/site'
+      fullPath: '/adm/site'
+      preLoaderRoute: typeof AdmSiteRouteImport
+      parentRoute: typeof AdmRouteRoute
+    }
   }
 }
 
+interface AdmRouteRouteChildren {
+  AdmMembrosRoute: typeof AdmMembrosRoute
+  AdmSiteRoute: typeof AdmSiteRoute
+  AdmIndexRoute: typeof AdmIndexRoute
+}
+
+const AdmRouteRouteChildren: AdmRouteRouteChildren = {
+  AdmMembrosRoute: AdmMembrosRoute,
+  AdmSiteRoute: AdmSiteRoute,
+  AdmIndexRoute: AdmIndexRoute,
+}
+
+const AdmRouteRouteWithChildren = AdmRouteRoute._addFileChildren(
+  AdmRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdmRouteRoute: AdmRouteRouteWithChildren,
+  AdminRoute: AdminRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

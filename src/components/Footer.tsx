@@ -1,9 +1,11 @@
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { churchConfig, navItems } from "@/data/church";
+import { useSiteSettings } from "@/site/useSiteSettings";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { settings } = useSiteSettings();
 
   return (
     <footer className="bg-green-950 text-white/70">
@@ -26,7 +28,7 @@ export function Footer() {
             </p>
             <div className="mt-6 flex gap-3">
               <a
-                href={churchConfig.instagram}
+                href={settings.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram da PIB Jussara"
@@ -35,7 +37,7 @@ export function Footer() {
                 <Instagram className="h-4 w-4" strokeWidth={1.75} />
               </a>
               <a
-                href={churchConfig.youtube}
+                href={settings.youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Canal da PIB Jussara no YouTube"
@@ -44,7 +46,7 @@ export function Footer() {
                 <Youtube className="h-4 w-4" strokeWidth={1.75} />
               </a>
               <a
-                href={churchConfig.facebook}
+                href={settings.facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook da PIB Jussara"
@@ -87,24 +89,24 @@ export function Footer() {
             <ul className="mt-6 space-y-4 text-sm">
               <li className="flex gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
-                {churchConfig.address.full}
+                {settings.fullAddress}
               </li>
               <li className="flex gap-3">
                 <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
                 <a
-                  href={`tel:${churchConfig.phone.replace(/\D/g, "")}`}
+                  href={`tel:${settings.phone.replace(/\D/g, "")}`}
                   className="hover:text-brand-lime"
                 >
-                  {churchConfig.phone}
+                  {settings.phone}
                 </a>
               </li>
               <li className="flex min-w-0 gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" strokeWidth={1.75} />
                 <a
-                  href={`mailto:${churchConfig.email}`}
+                  href={`mailto:${settings.institutionalEmail}`}
                   className="break-words hover:text-brand-lime"
                 >
-                  {churchConfig.email}
+                  {settings.institutionalEmail}
                 </a>
               </li>
             </ul>

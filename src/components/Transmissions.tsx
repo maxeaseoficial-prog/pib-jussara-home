@@ -1,10 +1,14 @@
 import { ArrowUpRight, Play } from "lucide-react";
 import { YouTubeVideo } from "./YouTubeVideo";
 import { featuredVideoId, messages } from "@/data/messages";
-import { churchConfig } from "@/data/church";
 import { Reveal } from "./Reveal";
+import { useSiteSettings } from "@/site/useSiteSettings";
+import { youtubeVideoIdFromUrl } from "@/site/site-settings";
 
 export function Transmissions() {
+  const { settings } = useSiteSettings();
+  const transmissionVideoId = youtubeVideoIdFromUrl(settings.youtubeLiveUrl) ?? featuredVideoId;
+
   return (
     <section id="transmissoes" className="bg-background py-20 sm:py-28 lg:py-32">
       <div className="mx-auto max-w-[1360px] px-5 sm:px-8 lg:px-12">
@@ -28,12 +32,15 @@ export function Transmissions() {
         </div>
 
         <Reveal delay={160} className="mt-12">
-          <YouTubeVideo videoId={featuredVideoId} title="Último culto transmitido — PIB Jussara" />
+          <YouTubeVideo
+            videoId={transmissionVideoId}
+            title="Último culto transmitido — PIB Jussara"
+          />
         </Reveal>
 
         <Reveal delay={220}>
           <a
-            href={churchConfig.youtube}
+            href={settings.youtubeUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="group mt-8 inline-flex items-center gap-2 rounded-full bg-green-800 px-7 py-4 text-sm font-bold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-green-700"
@@ -48,16 +55,18 @@ export function Transmissions() {
 
         <div className="mt-20">
           <Reveal>
-            <h3 className="eyebrow border-b border-border pb-4 text-green-700">Últimas mensagens</h3>
+            <h3 className="eyebrow border-b border-border pb-4 text-green-700">
+              Últimas mensagens
+            </h3>
           </Reveal>
           <ul className="mt-8 grid gap-5 lg:grid-cols-3">
             {messages.map((m, i) => (
-              <Reveal as="li" key={m.title} delay={i * 80}>
+              <Reveal as="li" key={m.title} delay={i * 80} className="min-w-0">
                 <a
                   href={`https://www.youtube.com/watch?v=${m.videoId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex h-full items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-green/50"
+                  className="group flex h-full min-w-0 items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-all duration-300 hover:-translate-y-1 hover:border-brand-green/50"
                 >
                   <span className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl bg-green-950">
                     <img

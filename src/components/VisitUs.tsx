@@ -1,10 +1,13 @@
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 import { churchConfig } from "@/data/church";
+import { useSiteSettings } from "@/site/useSiteSettings";
 import { Reveal } from "./Reveal";
 
 export function VisitUs() {
+  const { settings } = useSiteSettings();
+  const mapsQuery = settings.fullAddress || churchConfig.mapsQuery;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-    churchConfig.mapsQuery,
+    mapsQuery,
   )}`;
 
   return (
@@ -28,21 +31,21 @@ export function VisitUs() {
                   <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-green-700" strokeWidth={1.5} />
                   <span className="text-text-secondary">
                     <span className="block font-bold text-text-primary">Endereço</span>
-                    {churchConfig.address.full}
+                    {settings.fullAddress}
                   </span>
                 </li>
                 <li className="flex gap-4">
                   <Phone className="mt-0.5 h-5 w-5 shrink-0 text-green-700" strokeWidth={1.5} />
                   <span className="text-text-secondary">
                     <span className="block font-bold text-text-primary">Telefone</span>
-                    {churchConfig.phone}
+                    {settings.phone}
                   </span>
                 </li>
                 <li className="flex gap-4">
                   <Mail className="mt-0.5 h-5 w-5 shrink-0 text-green-700" strokeWidth={1.5} />
                   <span className="min-w-0 text-text-secondary">
                     <span className="block font-bold text-text-primary">E-mail</span>
-                    <span className="break-words">{churchConfig.email}</span>
+                    <span className="break-words">{settings.institutionalEmail}</span>
                   </span>
                 </li>
               </ul>
@@ -54,12 +57,17 @@ export function VisitUs() {
               <h3 className="eyebrow text-brand-lime">Horários dos cultos</h3>
               <ul className="mt-7 divide-y divide-white/10">
                 {churchConfig.services.map((s) => (
-                  <li key={`${s.day}-${s.name}`} className="flex items-baseline justify-between gap-4 py-4">
+                  <li
+                    key={`${s.day}-${s.name}`}
+                    className="flex items-baseline justify-between gap-4 py-4"
+                  >
                     <span className="min-w-0">
                       <span className="block text-sm font-bold">{s.name}</span>
                       <span className="block text-xs text-white/60">{s.day}</span>
                     </span>
-                    <span className="shrink-0 text-sm font-extrabold text-brand-lime">{s.time}</span>
+                    <span className="shrink-0 text-sm font-extrabold text-brand-lime">
+                      {s.time}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -70,7 +78,7 @@ export function VisitUs() {
             <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-surface">
               <iframe
                 title="Mapa da localização da PIB Jussara"
-                src={`https://www.google.com/maps?q=${encodeURIComponent(churchConfig.mapsQuery)}&output=embed`}
+                src={`https://www.google.com/maps?q=${encodeURIComponent(mapsQuery)}&output=embed`}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="min-h-64 w-full flex-1 border-0"

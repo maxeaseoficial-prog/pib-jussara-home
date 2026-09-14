@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
 import { AuthContext, type AuthContextValue, type Member } from "@/auth/auth-context";
 import { getSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { firstNameFrom, normalizeFullName, toCanonicalBrazilianPhone } from "@/auth/member-auth";
+import {
+  firstNameFrom,
+  normalizeFullName,
+  signUpErrorMessage,
+  toCanonicalBrazilianPhone,
+} from "@/auth/member-auth";
 
 type MemberProfile = {
   full_name: string;
@@ -161,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (error) {
             return {
               ok: false,
-              message: "Não foi possível criar sua conta. Revise os dados e tente novamente.",
+              message: signUpErrorMessage(error),
             };
           }
 
