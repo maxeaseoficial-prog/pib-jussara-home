@@ -4,10 +4,9 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const {
-          bearerTokenFromRequest,
-          verifyDatabaseWorkerToken,
-        } = await import("@/admin/admin-api.server");
+        const { bearerTokenFromRequest, verifyDatabaseWorkerToken } = await import(
+          "@/admin/admin-api.server"
+        );
         const token = bearerTokenFromRequest(request);
         let authorized = false;
 
@@ -16,23 +15,16 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
           authorized = (await authenticateCronRequest(request)) === null;
         }
 
-        if (!authorized && token) {
-          authorized = await verifyDatabaseWorkerToken(token);
-        }
-
-        if (!authorized) {
-          return Response.json({ error: "Unauthorized" }, { status: 401 });
-        }
+        if (!authorized && token) authorized = await verifyDatabaseWorkerToken(token);
+        if (!authorized) return Response.json({ error: "Unauthorized" }, { status: 401 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const {
-          getZApiConfigurationStatus,
-          normalizeWhatsappPhone,
-          sendZApiText,
-        } = await import("@/integrations/zapi/zapi.server");
+        const { getZApiConfigurationStatus, normalizeWhatsappPhone, sendZApiText } = await import(
+          "@/integrations/zapi/zapi.server"
+        );
         const db = supabaseAdmin as any;
 
-        const configuration = getZApiConfigurationStatus();
+        const configuration = await getZApiConfigurationStatus();
         const { data: campaigns, error: claimError } = await db.rpc(
           "claim_due_whatsapp_campaigns",
           { p_limit: 2 },
@@ -47,7 +39,7 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
 
         for (const campaign of campaigns ?? []) {
           if (!configuration.configured) {
-            const message = "Credenciais Z-API não configuradas no servidor.";
+            const message = "Credenciais Z-API não configuradas.";
             await db.rpc("fail_whatsapp_campaign_run", {
               p_campaign_id: campaign.id,
               p_error: message,
@@ -66,11 +58,40 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
             continue;
           }
 
-          const { data: members, error: membersError } = await db
+          let memberIds: string[] | null = null;
+          if (campaign.audience === "selected_members") {
+            const links = await db
+              .from("whatsapp_campaign_members")
+              .select("member_id")
+              .eq("campaign_id", campaign.id);
+
+            if (links.error) {
+              await db.rpc("fail_whatsapp_campaign_run", {
+                p_campaign_id: campaign.id,
+                p_error: "Não foi possível carregar os membros selecionados.",
+              });
+              summaries.push({ campaignId: campaign.id, status: "error" });
+              continue;
+            }
+
+            memberIds = (links.data ?? []).map((row: { member_id: string }) => row.member_id);
+            if (memberIds.length === 0) {
+              await db.rpc("fail_whatsapp_campaign_run", {
+                p_campaign_id: campaign.id,
+                p_error: "Campanha sem membros selecionados.",
+              });
+              summaries.push({ campaignId: campaign.id, status: "error" });
+              continue;
+            }
+          }
+
+          let memberQuery = db
             .from("profiles")
             .select("id,full_name,phone")
             .order("created_at", { ascending: true });
+          if (memberIds) memberQuery = memberQuery.in("id", memberIds);
 
+          const { data: members, error: membersError } = await memberQuery;
           if (membersError) {
             await db.rpc("fail_whatsapp_campaign_run", {
               p_campaign_id: campaign.id,
@@ -100,12 +121,9 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
               continue;
             }
 
-            if (existing.data && existing.data.status !== "queued") {
-              continue;
-            }
+            if (existing.data && existing.data.status !== "queued") continue;
 
             let deliveryId = existing.data?.id as string | undefined;
-
             if (!deliveryId) {
               const inserted = await db
                 .from("whatsapp_deliveries")
@@ -129,7 +147,6 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
               }
 
               deliveryId = inserted.data.id;
-
               if (!normalizedPhone) {
                 skipped += 1;
                 continue;
@@ -177,25 +194,16 @@ export const Route = createFileRoute("/api/cron/whatsapp")({
             }
           }
 
-          const summaryError =
-            failed > 0 ? `${failed} envio(s) falharam; ${skipped} foram pulados.` : null;
-
+          const summaryError = failed > 0 ? `${failed} envio(s) falharam; ${skipped} foram pulados.` : null;
           const completed = await db.rpc("complete_whatsapp_campaign_run", {
             p_campaign_id: campaign.id,
             p_error: summaryError,
           });
-
           if (completed.error) {
             console.error("[whatsapp-worker] Campaign completion failed", completed.error.message);
           }
 
-          summaries.push({
-            campaignId: campaign.id,
-            status: "processed",
-            sent,
-            failed,
-            skipped,
-          });
+          summaries.push({ campaignId: campaign.id, status: "processed", sent, failed, skipped });
         }
 
         return Response.json({ ok: true, processed: summaries.length, campaigns: summaries });
