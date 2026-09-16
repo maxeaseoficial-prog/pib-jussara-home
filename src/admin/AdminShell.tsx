@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Building2,
+  CalendarDays,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
@@ -27,6 +28,7 @@ import { cn } from "@/lib/utils";
 const adminNavItems = [
   { label: "Visão geral", to: "/adm", icon: LayoutDashboard, exact: true },
   { label: "Informações do site", to: "/adm/site", icon: Building2, exact: false },
+  { label: "Programação", to: "/adm/programacao", icon: CalendarDays, exact: false },
   { label: "Membros", to: "/adm/membros", icon: UsersRound, exact: false },
   { label: "Mensagens", to: "/adm/mensagens", icon: MessageSquareText, exact: false },
 ] as const;

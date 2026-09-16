@@ -14,6 +14,8 @@ import { Route as AdmRouteRouteImport } from './routes/adm/route'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdmIndexRouteImport } from './routes/adm/index'
 import { Route as AdmMembrosRouteImport } from './routes/adm/membros'
+import { Route as AdmMensagensRouteImport } from './routes/adm/mensagens'
+import { Route as AdmProgramacaoRouteImport } from './routes/adm/programacao'
 import { Route as AdmSiteRouteImport } from './routes/adm/site'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +43,16 @@ const AdmMembrosRoute = AdmMembrosRouteImport.update({
   path: '/membros',
   getParentRoute: () => AdmRouteRoute,
 } as any)
+const AdmMensagensRoute = AdmMensagensRouteImport.update({
+  id: '/mensagens',
+  path: '/mensagens',
+  getParentRoute: () => AdmRouteRoute,
+} as any)
+const AdmProgramacaoRoute = AdmProgramacaoRouteImport.update({
+  id: '/programacao',
+  path: '/programacao',
+  getParentRoute: () => AdmRouteRoute,
+} as any)
 const AdmSiteRoute = AdmSiteRouteImport.update({
   id: '/site',
   path: '/site',
@@ -52,6 +64,8 @@ export interface FileRoutesByFullPath {
   '/adm': typeof AdmRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/adm/membros': typeof AdmMembrosRoute
+  '/adm/mensagens': typeof AdmMensagensRoute
+  '/adm/programacao': typeof AdmProgramacaoRoute
   '/adm/site': typeof AdmSiteRoute
   '/adm/': typeof AdmIndexRoute
 }
@@ -59,6 +73,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/adm/membros': typeof AdmMembrosRoute
+  '/adm/mensagens': typeof AdmMensagensRoute
+  '/adm/programacao': typeof AdmProgramacaoRoute
   '/adm/site': typeof AdmSiteRoute
   '/adm': typeof AdmIndexRoute
 }
@@ -68,20 +84,39 @@ export interface FileRoutesById {
   '/adm': typeof AdmRouteRouteWithChildren
   '/admin': typeof AdminRoute
   '/adm/membros': typeof AdmMembrosRoute
+  '/adm/mensagens': typeof AdmMensagensRoute
+  '/adm/programacao': typeof AdmProgramacaoRoute
   '/adm/site': typeof AdmSiteRoute
   '/adm/': typeof AdmIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/adm' | '/admin' | '/adm/membros' | '/adm/site' | '/adm/'
+  fullPaths:
+    | '/'
+    | '/adm'
+    | '/admin'
+    | '/adm/membros'
+    | '/adm/mensagens'
+    | '/adm/programacao'
+    | '/adm/site'
+    | '/adm/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/adm/membros' | '/adm/site' | '/adm'
+  to:
+    | '/'
+    | '/admin'
+    | '/adm/membros'
+    | '/adm/mensagens'
+    | '/adm/programacao'
+    | '/adm/site'
+    | '/adm'
   id:
     | '__root__'
     | '/'
     | '/adm'
     | '/admin'
     | '/adm/membros'
+    | '/adm/mensagens'
+    | '/adm/programacao'
     | '/adm/site'
     | '/adm/'
   fileRoutesById: FileRoutesById
@@ -129,6 +164,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdmMembrosRouteImport
       parentRoute: typeof AdmRouteRoute
     }
+    '/adm/mensagens': {
+      id: '/adm/mensagens'
+      path: '/mensagens'
+      fullPath: '/adm/mensagens'
+      preLoaderRoute: typeof AdmMensagensRouteImport
+      parentRoute: typeof AdmRouteRoute
+    }
+    '/adm/programacao': {
+      id: '/adm/programacao'
+      path: '/programacao'
+      fullPath: '/adm/programacao'
+      preLoaderRoute: typeof AdmProgramacaoRouteImport
+      parentRoute: typeof AdmRouteRoute
+    }
     '/adm/site': {
       id: '/adm/site'
       path: '/site'
@@ -141,12 +190,16 @@ declare module '@tanstack/react-router' {
 
 interface AdmRouteRouteChildren {
   AdmMembrosRoute: typeof AdmMembrosRoute
+  AdmMensagensRoute: typeof AdmMensagensRoute
+  AdmProgramacaoRoute: typeof AdmProgramacaoRoute
   AdmSiteRoute: typeof AdmSiteRoute
   AdmIndexRoute: typeof AdmIndexRoute
 }
 
 const AdmRouteRouteChildren: AdmRouteRouteChildren = {
   AdmMembrosRoute: AdmMembrosRoute,
+  AdmMensagensRoute: AdmMensagensRoute,
+  AdmProgramacaoRoute: AdmProgramacaoRoute,
   AdmSiteRoute: AdmSiteRoute,
   AdmIndexRoute: AdmIndexRoute,
 }

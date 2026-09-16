@@ -1,12 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Building2, Mail, MapPin, Phone, RefreshCw, UsersRound } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  CalendarDays,
+  Mail,
+  MapPin,
+  Phone,
+  RefreshCw,
+  UsersRound,
+} from "lucide-react";
 import { AdminPageHeader } from "@/admin/AdminPageHeader";
 import {
   adminQueryKeys,
   loadAdminMemberCount,
   loadPersistentSiteSettings,
 } from "@/admin/admin-data";
+import { loadProgrammingSummary, programmingQueryKeys } from "@/programming/programming-data";
+import { dateString, daysInMonth, getSaoPauloTodayString, parseDateString } from "@/programming/schedule";
 
 export const Route = createFileRoute("/adm/")({
   component: AdminOverview,
@@ -20,6 +31,16 @@ function AdminOverview() {
   const siteSettings = useQuery({
     queryKey: adminQueryKeys.siteSettings,
     queryFn: ({ signal }) => loadPersistentSiteSettings(signal),
+  });
+
+  const today = parseDateString(getSaoPauloTodayString());
+  const year = today?.year ?? new Date().getFullYear();
+  const monthIndex = today?.monthIndex ?? new Date().getMonth();
+  const monthStart = dateString(year, monthIndex, 1);
+  const monthEnd = dateString(year, monthIndex, daysInMonth(year, monthIndex));
+  const programming = useQuery({
+    queryKey: programmingQueryKeys.summary(monthStart, monthEnd),
+    queryFn: () => loadProgrammingSummary(monthStart, monthEnd),
   });
 
   return (
@@ -71,6 +92,49 @@ function AdminOverview() {
             </Link>
           )}
         </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-border bg-white p-6 sm:p-8">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex gap-4">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-surface-soft text-green-700">
+              <CalendarDays className="h-6 w-6" strokeWidth={1.7} aria-hidden="true" />
+            </span>
+            <div>
+              <h2 className="text-lg font-extrabold text-green-950">Programação</h2>
+              <p className="mt-1 text-sm leading-6 text-text-secondary">
+                Cultos fixos e calendário mensal exibidos na Home.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/adm/programacao"
+            className="inline-flex min-h-11 items-center gap-2 self-start rounded-xl border border-border px-4 text-sm font-bold text-green-900 transition-colors hover:bg-surface-soft sm:self-auto"
+          >
+            Gerenciar programação
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </Link>
+        </div>
+
+        {programming.isPending ? (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="h-20 animate-pulse rounded-xl bg-surface-soft" />
+            <div className="h-20 animate-pulse rounded-xl bg-surface-soft" />
+          </div>
+        ) : programming.isError ? (
+          <p className="mt-6 text-sm font-semibold text-red-800">Não foi possível carregar o resumo da programação.</p>
+        ) : (
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-surface-soft px-5 py-4">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-text-secondary">Cultos fixos ativos</p>
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-green-950">{programming.data.activeServices}</p>
+            </div>
+            <div className="rounded-xl bg-surface-soft px-5 py-4">
+              <p className="text-xs font-bold uppercase tracking-[0.1em] text-text-secondary">Eventos publicados neste mês</p>
+              <p className="mt-2 text-2xl font-extrabold tabular-nums text-green-950">{programming.data.publishedEvents}</p>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="mt-8 rounded-2xl border border-border bg-white p-6 sm:p-8">
