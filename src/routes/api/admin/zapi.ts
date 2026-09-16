@@ -10,9 +10,9 @@ export const Route = createFileRoute("/api/admin/zapi")({
         const authorization = await authorizeAdminRequest(request);
         if (!authorization.ok) return authorization.response;
 
-        let body: { action?: unknown; registerWorker?: unknown };
+        let body: Record<string, unknown>;
         try {
-          body = (await request.json()) as typeof body;
+          body = (await request.json()) as Record<string, unknown>;
         } catch {
           return Response.json({ error: "Requisição inválida." }, { status: 400 });
         }
@@ -24,30 +24,81 @@ export const Route = createFileRoute("/api/admin/zapi")({
           getZApiInstanceStatus,
           getZApiQrCode,
           getZApiWebhookSecret,
+          saveZApiConfiguration,
+          testZApiConfiguration,
         } = await import("@/integrations/zapi/zapi.server");
 
         if (body.registerWorker === true) {
           const workerUrl = new URL("/api/cron/whatsapp", request.url).toString();
-          if (workerUrl.startsWith("https://")) {
-            await registerWhatsappWorkerUrl(workerUrl);
-          }
-        }
-
-        const configuration = getZApiConfigurationStatus();
-        if (!configuration.configured) {
-          return Response.json({
-            configured: false,
-            connected: false,
-            smartphoneConnected: false,
-            error: null,
-            missing: configuration.missing,
-          });
+          if (workerUrl.startsWith("https://")) await registerWhatsappWorkerUrl(workerUrl);
         }
 
         try {
+          if (body.action === "saveConfiguration") {
+            const instanceId = typeof body.instanceId === "string" ? body.instanceId.trim() : "";
+            const instanceToken =
+              typeof body.instanceToken === "string" ? body.instanceToken.trim() : "";
+            const clientToken = typeof body.clientToken === "string" ? body.clientToken.trim() : "";
+            const baseUrl =
+              typeof body.baseUrl === "string" && body.baseUrl.trim()
+                ? body.baseUrl.trim()
+                : "https://api.z-api.io";
+
+            if (!instanceId || !instanceToken || !clientToken) {
+              return Response.json(
+                { error: "Preencha Instance ID, Instance Token e Client Token." },
+                { status: 400 },
+              );
+            }
+            if (!baseUrl.startsWith("https://")) {
+              return Response.json({ error: "A URL base precisa usar HTTPS." }, { status: 400 });
+            }
+
+            const status = await testZApiConfiguration({
+              instanceId,
+              instanceToken,
+              clientToken,
+              baseUrl,
+            });
+
+            await saveZApiConfiguration({ instanceId, instanceToken, clientToken, baseUrl });
+
+            // Configure the delivery webhook immediately after saving when possible.
+            const secret = await getZApiWebhookSecret();
+            if (secret) {
+              const callback = new URL("/api/webhooks/zapi/status", request.url);
+              callback.searchParams.set("secret", secret);
+              await configureZApiMessageStatusWebhook(callback.toString()).catch(() => undefined);
+            }
+
+            const configuration = await getZApiConfigurationStatus();
+            return Response.json({
+              ok: true,
+              configured: true,
+              instanceIdMasked: configuration.instanceIdMasked,
+              ...status,
+            });
+          }
+
+          const configuration = await getZApiConfigurationStatus();
+          if (!configuration.configured) {
+            return Response.json({
+              configured: false,
+              connected: false,
+              smartphoneConnected: false,
+              error: null,
+              missing: configuration.missing,
+              instanceIdMasked: null,
+            });
+          }
+
           if (body.action === "status") {
             const status = await getZApiInstanceStatus();
-            return Response.json({ configured: true, ...status });
+            return Response.json({
+              configured: true,
+              instanceIdMasked: configuration.instanceIdMasked,
+              ...status,
+            });
           }
 
           if (body.action === "qr") {
@@ -56,10 +107,10 @@ export const Route = createFileRoute("/api/admin/zapi")({
           }
 
           if (body.action === "configureWebhook") {
-            const secret = getZApiWebhookSecret();
+            const secret = await getZApiWebhookSecret();
             if (!secret) {
               return Response.json(
-                { error: "Configure ZAPI_WEBHOOK_SECRET no ambiente do servidor antes de ativar o webhook." },
+                { error: "Não foi possível gerar a chave segura do webhook." },
                 { status: 409 },
               );
             }
@@ -86,7 +137,7 @@ export const Route = createFileRoute("/api/admin/zapi")({
           }
 
           console.error(
-            "[zapi-admin]",
+            "[zapi-admin] Operation failed",
             error instanceof Error ? error.message : "Unknown Z-API admin error",
           );
           return Response.json(
