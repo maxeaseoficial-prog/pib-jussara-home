@@ -22,15 +22,7 @@ function mapStatus(value: unknown) {
   if (status === "READ" || status === "PLAYED") return "read";
   if (status === "RECEIVED" || status === "DELIVERED") return "received";
   if (status === "SENT" || status === "SERVER_ACK") return "sent";
-  if (
-    status === "ERROR" ||
-    status === "FAILED" ||
-    status === "FAILURE" ||
-    status === "CANCELED" ||
-    status === "CANCELLED"
-  ) {
-    return "failed";
-  }
+  if (["ERROR", "FAILED", "FAILURE", "CANCELED", "CANCELLED"].includes(status)) return "failed";
   return null;
 }
 
@@ -41,7 +33,7 @@ export const Route = createFileRoute("/api/webhooks/zapi/status")({
         const { getZApiWebhookSecret, timingSafeSecretEquals } = await import(
           "@/integrations/zapi/zapi.server"
         );
-        const expected = getZApiWebhookSecret();
+        const expected = await getZApiWebhookSecret();
         const provided = new URL(request.url).searchParams.get("secret") ?? "";
 
         if (!expected || !provided || !(await timingSafeSecretEquals(provided, expected))) {
@@ -57,10 +49,7 @@ export const Route = createFileRoute("/api/webhooks/zapi/status")({
 
         const deliveryStatus = mapStatus(payload["status"]);
         const ids = collectIds(payload);
-
-        if (!deliveryStatus || ids.length === 0) {
-          return Response.json({ ok: true, updated: 0 });
-        }
+        if (!deliveryStatus || ids.length === 0) return Response.json({ ok: true, updated: 0 });
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const db = supabaseAdmin as any;
