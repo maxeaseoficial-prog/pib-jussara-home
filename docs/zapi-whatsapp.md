@@ -1,62 +1,70 @@
 # WhatsApp / Z-API — PIB Jussara
 
-## Arquitetura
+## Visão geral
 
-A central de mensagens fica em `/adm/mensagens`.
+A central fica em `/adm/mensagens` e funciona como uma área de **campanhas de mensagem**.
 
-- O navegador acessa somente campanhas, histórico e endpoints internos do próprio site.
-- `ZAPI_INSTANCE_ID`, `ZAPI_INSTANCE_TOKEN`, `ZAPI_CLIENT_TOKEN` e `ZAPI_WEBHOOK_SECRET` são lidos apenas no servidor.
-- O número da igreja é vinculado à instância Z-API pelo QR Code.
-- Campanhas são armazenadas no Supabase com RLS administrativo.
-- Um worker protegido processa campanhas vencidas e registra uma entrega por membro/execução.
-- O banco usa `pg_cron` + `pg_net` para chamar o worker a cada minuto. O token do worker é gerado na migration e fica criptografado no Supabase Vault.
-- O webhook da Z-API atualiza entregas para `sent`, `received`, `read` ou `failed`.
+- O administrador configura a Z-API diretamente no painel.
+- As credenciais são enviadas somente para o backend e armazenadas no Supabase Vault.
+- O navegador nunca recebe Instance Token, Client Token ou segredo do webhook depois do salvamento.
+- O WhatsApp da igreja é vinculado à instância pelo QR Code da Z-API.
+- Campanhas podem atingir todos os membros ou uma seleção individual de membros cadastrados.
+- O banco agenda as execuções e um worker protegido envia as mensagens quando chega o horário.
+- O webhook atualiza o histórico para `sent`, `received`, `read` ou `failed`.
 
-A Z-API não é o agendador. O agendamento pertence à aplicação; quando chega o horário, o worker chama o endpoint `send-text` da Z-API.
+A Z-API é usada para conexão e envio; o agendamento pertence à aplicação.
 
-## Variáveis de ambiente
+## Configuração da API pelo painel
 
-Configure no ambiente **server-side** do projeto:
+Abra `/adm/mensagens` e clique em **Conectar API**.
 
-```text
-ZAPI_INSTANCE_ID=
-ZAPI_INSTANCE_TOKEN=
-ZAPI_CLIENT_TOKEN=
-ZAPI_WEBHOOK_SECRET=
-ZAPI_BASE_URL=https://api.z-api.io
-```
+O formulário solicita:
 
-Não use prefixo `VITE_` nessas variáveis. Isso impediria que os segredos fossem enviados ao bundle do navegador.
+- Instance ID
+- Instance Token
+- Client Token
+- Base URL, com padrão `https://api.z-api.io`
 
-As credenciais da instância são obtidas no painel da Z-API. A instância precisa existir antes de o administrador conectar o WhatsApp pelo QR Code.
+Ao salvar, o backend testa a instância consultando o status da Z-API. Somente depois de uma resposta válida as credenciais são persistidas no Vault.
 
-## Fluxo de ativação
+O segredo do webhook é gerado automaticamente no servidor na primeira configuração e reutilizado. O administrador não precisa informá-lo.
 
-1. Aplicar a migration `20260916104000_zapi_whatsapp_messaging.sql`.
-2. Publicar a versão do site contendo os endpoints `/api/admin/zapi`, `/api/cron/whatsapp` e `/api/webhooks/zapi/status`.
-3. Adicionar as quatro variáveis Z-API no ambiente do servidor.
-4. Abrir `/adm/mensagens`.
-5. Clicar em **Conectar WhatsApp** e ler o QR Code com o WhatsApp da igreja.
-6. Depois que o status aparecer como conectado, clicar em **Ativar status de entrega** para registrar o webhook de status na Z-API.
-7. Criar um agendamento futuro e acompanhar a execução no histórico.
+As variáveis `ZAPI_INSTANCE_ID`, `ZAPI_INSTANCE_TOKEN`, `ZAPI_CLIENT_TOKEN`, `ZAPI_WEBHOOK_SECRET` e `ZAPI_BASE_URL` continuam aceitas apenas como fallback para instalações antigas; o fluxo normal é pelo painel.
 
-## Agendamento
+## Campanhas
+
+### Público
+
+Uma campanha usa um destes públicos:
+
+- `all_members`: todos os membros cadastrados em `profiles`.
+- `selected_members`: somente os membros vinculados em `whatsapp_campaign_members`.
+
+A seleção individual é feita no painel através de uma lista pesquisável dos membros reais.
+
+### Frequência
 
 - `once`: data e horário únicos no fuso `America/Sao_Paulo`.
-- `weekly`: um ou mais dias da semana + horário.
-- O worker é chamado a cada minuto.
-- A função `claim_due_whatsapp_campaigns` usa lock/claim para impedir que dois workers assumam a mesma campanha ao mesmo tempo.
-- A tabela `whatsapp_deliveries` possui índice único por campanha, membro e horário da execução para evitar envio duplicado.
-- Uma campanha semanal calcula a próxima execução no banco depois de cada rodada.
+- `weekly`: um ou mais dias da semana, horário e **data de início obrigatória**.
+
+A próxima execução de uma campanha semanal nunca é calculada antes da sua `start_date`.
+
+## Execução
+
+- O worker `/api/cron/whatsapp` é chamado pelo `pg_cron`/`pg_net`.
+- `claim_due_whatsapp_campaigns` evita que dois workers assumam a mesma campanha ao mesmo tempo.
+- `whatsapp_deliveries` tem proteção de unicidade por campanha, membro e execução para impedir duplicidade.
+- Para `selected_members`, o worker consulta `whatsapp_campaign_members` antes de carregar os perfis.
+- Campanhas semanais calculam a execução seguinte ao final de cada rodada.
 
 ## Segurança
 
-- Apenas administradores podem criar/alterar campanhas e consultar entregas.
-- Credenciais Z-API nunca são persistidas nas tabelas nem retornadas à interface.
-- O cron usa token gerado no banco e armazenado no Supabase Vault.
-- O webhook exige `ZAPI_WEBHOOK_SECRET`.
-- O endpoint administrativo exige sessão Supabase válida e `profiles.role = 'admin'`.
-- Erros técnicos não registram os tokens da Z-API.
+- Apenas `profiles.role = 'admin'` pode configurar a integração, criar campanhas e consultar histórico.
+- As credenciais da Z-API não ficam em tabelas públicas, `localStorage`, variáveis `VITE_` ou respostas ao frontend.
+- Segredos são armazenados no Supabase Vault.
+- A interface recebe somente metadados, como `configured`, status da conexão e um Instance ID mascarado.
+- Tokens e segredos não são escritos nos logs da aplicação.
+- O worker usa um token próprio armazenado no Vault.
 
 ## Endpoints Z-API usados
 
@@ -65,8 +73,15 @@ As credenciais da instância são obtidas no painel da Z-API. A instância preci
 - `POST /instances/{instanceId}/token/{token}/send-text`
 - `PUT /instances/{instanceId}/token/{token}/update-webhook-message-status`
 
-Os requests usam o header `Client-Token`. O envio de texto usa telefone somente com dígitos em formato internacional e `delayMessage: 5`.
+Os requests usam o header `Client-Token`. Telefones são normalizados para o formato internacional antes do envio.
+
+## Migrations
+
+A infraestrutura foi dividida em migrations incrementais:
+
+1. `20260916104000_zapi_whatsapp_messaging.sql` — campanhas, entregas, worker e cron.
+2. `20260916111500_campaigns_and_zapi_vault.sql` — públicos segmentados, `start_date` semanal e configuração Z-API via Vault.
 
 ## Operação responsável
 
-Envie mensagens somente a pessoas que esperam receber comunicações da igreja. Não use a central para listas adquiridas, prospecção ou disparos não solicitados. Volume, frequência e conteúdo devem respeitar as políticas do WhatsApp e da Z-API.
+Use a central apenas para comunicações esperadas pelos membros da igreja. Volume, frequência e conteúdo devem respeitar as políticas aplicáveis do WhatsApp e da Z-API.
