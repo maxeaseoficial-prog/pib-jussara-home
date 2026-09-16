@@ -4,11 +4,12 @@ export type WhatsappCampaign = {
   id: string;
   title: string;
   message: string;
-  audience: "all_members";
+  audience: "all_members" | "selected_members";
   schedule_type: "once" | "weekly";
   scheduled_at: string | null;
   weekdays: number[] | null;
   send_time: string | null;
+  start_date: string | null;
   timezone: string;
   status: "scheduled" | "processing" | "paused" | "completed" | "error";
   next_run_at: string | null;
@@ -18,6 +19,11 @@ export type WhatsappCampaign = {
   last_error: string | null;
   created_at: string;
   updated_at: string;
+};
+
+export type WhatsappCampaignMember = {
+  campaign_id: string;
+  member_id: string;
 };
 
 export type WhatsappDelivery = {
@@ -42,6 +48,7 @@ export type ZapiConnectionStatus = {
   smartphoneConnected: boolean;
   error: string | null;
   missing?: string[];
+  instanceIdMasked?: string | null;
 };
 
 export type ZapiQrCode = {
@@ -51,6 +58,7 @@ export type ZapiQrCode = {
 
 export const whatsappQueryKeys = {
   campaigns: ["admin", "whatsapp", "campaigns"] as const,
+  campaignMembers: ["admin", "whatsapp", "campaign-members"] as const,
   deliveries: ["admin", "whatsapp", "deliveries"] as const,
   status: ["admin", "whatsapp", "status"] as const,
   scheduledCount: ["admin", "whatsapp", "scheduled-count"] as const,
@@ -59,7 +67,6 @@ export const whatsappQueryKeys = {
 async function requireClient() {
   const client = await getSupabase();
   if (!client) throw new Error("Supabase unavailable");
-  // The migration is the source of truth until generated Supabase types are refreshed.
   return client as any;
 }
 
@@ -67,7 +74,6 @@ async function getAccessToken() {
   const client = await requireClient();
   const { data, error } = await client.auth.getSession();
   if (error) throw error;
-
   const token = data.session?.access_token;
   if (!token) throw new Error("Sua sessão expirou. Entre novamente no painel.");
   return token as string;
@@ -92,7 +98,6 @@ async function adminApi<T>(body: Record<string, unknown>): Promise<T> {
   if (!response.ok) {
     throw new Error(payload?.error || "Não foi possível concluir a operação com o WhatsApp.");
   }
-
   return payload as T;
 }
 
@@ -101,15 +106,23 @@ export async function loadWhatsappCampaigns(signal?: AbortSignal) {
   const request = client
     .from("whatsapp_campaigns")
     .select(
-      "id,title,message,audience,schedule_type,scheduled_at,weekdays,send_time,timezone,status,next_run_at,processing_started_at,created_by,last_run_at,last_error,created_at,updated_at",
+      "id,title,message,audience,schedule_type,scheduled_at,weekdays,send_time,start_date,timezone,status,next_run_at,processing_started_at,created_by,last_run_at,last_error,created_at,updated_at",
     )
     .order("created_at", { ascending: false })
     .limit(100);
-
   if (signal) request.abortSignal(signal);
   const { data, error } = await request;
   if (error) throw error;
   return (data ?? []) as WhatsappCampaign[];
+}
+
+export async function loadWhatsappCampaignMembers(signal?: AbortSignal) {
+  const client = await requireClient();
+  const request = client.from("whatsapp_campaign_members").select("campaign_id,member_id");
+  if (signal) request.abortSignal(signal);
+  const { data, error } = await request;
+  if (error) throw error;
+  return (data ?? []) as WhatsappCampaignMember[];
 }
 
 export async function loadWhatsappDeliveries(signal?: AbortSignal) {
@@ -121,7 +134,6 @@ export async function loadWhatsappDeliveries(signal?: AbortSignal) {
     )
     .order("created_at", { ascending: false })
     .limit(100);
-
   if (signal) request.abortSignal(signal);
   const { data, error } = await request;
   if (error) throw error;
@@ -134,7 +146,6 @@ export async function loadScheduledWhatsappCampaignCount(signal?: AbortSignal) {
     .from("whatsapp_campaigns")
     .select("id", { count: "exact", head: true })
     .in("status", ["scheduled", "processing"]);
-
   if (signal) request.abortSignal(signal);
   const { count, error } = await request;
   if (error) throw error;
@@ -144,22 +155,27 @@ export async function loadScheduledWhatsappCampaignCount(signal?: AbortSignal) {
 export async function createWhatsappCampaign(input: {
   title: string;
   message: string;
+  audience: "all_members" | "selected_members";
+  memberIds?: string[];
   scheduleType: "once" | "weekly";
   scheduledLocal?: string | null;
   weekdays?: number[] | null;
   sendTime?: string | null;
+  startDate?: string | null;
 }) {
   const client = await requireClient();
-  const { data, error } = await client.rpc("admin_create_whatsapp_campaign", {
+  const { data, error } = await client.rpc("admin_create_whatsapp_campaign_v2", {
     p_title: input.title,
     p_message: input.message,
+    p_audience: input.audience,
+    p_member_ids: input.memberIds?.length ? input.memberIds : null,
     p_schedule_type: input.scheduleType,
     p_scheduled_local: input.scheduledLocal || null,
     p_weekdays: input.weekdays?.length ? input.weekdays : null,
     p_send_time: input.sendTime || null,
+    p_start_date: input.startDate || null,
     p_timezone: "America/Sao_Paulo",
   });
-
   if (error) throw error;
   return data as WhatsappCampaign;
 }
@@ -173,7 +189,6 @@ export async function setWhatsappCampaignStatus(
     p_campaign_id: campaignId,
     p_status: status,
   });
-
   if (error) throw error;
   return data as WhatsappCampaign;
 }
@@ -186,6 +201,18 @@ export async function deleteWhatsappCampaign(campaignId: string) {
 
 export async function loadZapiStatus() {
   return adminApi<ZapiConnectionStatus>({ action: "status", registerWorker: true });
+}
+
+export async function saveZapiConfiguration(input: {
+  instanceId: string;
+  instanceToken: string;
+  clientToken: string;
+  baseUrl: string;
+}) {
+  return adminApi<ZapiConnectionStatus & { ok: true }>({
+    action: "saveConfiguration",
+    ...input,
+  });
 }
 
 export async function loadZapiQrCode() {
