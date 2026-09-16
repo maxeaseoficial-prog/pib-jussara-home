@@ -9,6 +9,7 @@ import {
   LoaderCircle,
   LogOut,
   Menu,
+  MessageSquareText,
   UsersRound,
 } from "lucide-react";
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
@@ -27,6 +28,7 @@ const adminNavItems = [
   { label: "Visão geral", to: "/adm", icon: LayoutDashboard, exact: true },
   { label: "Informações do site", to: "/adm/site", icon: Building2, exact: false },
   { label: "Membros", to: "/adm/membros", icon: UsersRound, exact: false },
+  { label: "Mensagens", to: "/adm/mensagens", icon: MessageSquareText, exact: false },
 ] as const;
 
 function AdminNavigation({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
