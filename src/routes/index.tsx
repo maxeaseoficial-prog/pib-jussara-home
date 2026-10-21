@@ -6,7 +6,6 @@ import { Leadership } from "@/components/Leadership";
 import { UpcomingEvents } from "@/components/UpcomingEvents";
 import { Mission } from "@/components/Mission";
 import { Transmissions } from "@/components/Transmissions";
-import { Community } from "@/components/Community";
 import { VisitUs } from "@/components/VisitUs";
 import { FinalCTA } from "@/components/FinalCTA";
 import { Footer } from "@/components/Footer";
@@ -40,7 +39,6 @@ function Index() {
         <UpcomingEvents />
         <Mission />
         <Transmissions />
-        <Community />
         <FinalCTA />
         <VisitUs />
       </main>
