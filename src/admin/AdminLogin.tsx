@@ -4,12 +4,12 @@ import { useState, type FormEvent } from "react";
 import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
-import { isValidEmail } from "@/auth/member-auth";
 import { Input } from "@/components/ui/input";
+
+const ADMIN_EMAIL = "igrejapibjussara@gmail.com";
 
 export function AdminLogin() {
   const { signIn } = useAuth();
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,13 +19,13 @@ export function AdminLogin() {
     event.preventDefault();
     setError("");
 
-    if (!isValidEmail(email) || !password) {
-      setError("Informe um e-mail válido e sua senha.");
+    if (!password) {
+      setError("Informe a senha administrativa.");
       return;
     }
 
     setIsSubmitting(true);
-    const result = await signIn(email, password);
+    const result = await signIn(ADMIN_EMAIL, password);
     setIsSubmitting(false);
 
     if (!result.ok) setError(result.message);
@@ -73,8 +73,8 @@ export function AdminLogin() {
             Área administrativa
           </h1>
           <p className="mt-4 max-w-[46ch] text-base leading-7 text-text-secondary">
-            Entre com sua conta. O acesso ao painel será liberado somente após a verificação da
-            permissão administrativa.
+            Digite a senha administrativa para acessar o painel. A conta da igreja já está definida
+            automaticamente.
           </p>
 
           {error ? (
@@ -87,22 +87,16 @@ export function AdminLogin() {
           ) : null}
 
           <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
-            <div>
-              <label htmlFor="admin-email" className="text-sm font-bold text-text-primary">
-                E-mail
-              </label>
-              <Input
-                id="admin-email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="mt-2 h-12 rounded-xl bg-white text-base shadow-none md:text-sm"
-                placeholder="voce@exemplo.com"
-                required
-              />
-            </div>
+            <input
+              type="email"
+              name="username"
+              autoComplete="username"
+              value={ADMIN_EMAIL}
+              readOnly
+              tabIndex={-1}
+              aria-hidden="true"
+              className="hidden"
+            />
 
             <div>
               <label htmlFor="admin-password" className="text-sm font-bold text-text-primary">
