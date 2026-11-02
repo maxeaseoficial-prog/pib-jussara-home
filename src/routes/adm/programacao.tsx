@@ -62,7 +62,6 @@ type Tab = "services" | "calendar";
 type SaveServiceArgs = {
   current: ChurchService | null;
   input: ChurchServiceInput;
-  file: File | null;
 };
 type SaveEventArgs = {
   current: CalendarEvent | null;
@@ -94,26 +93,10 @@ function AdminProgramming() {
   });
 
   const saveService = useMutation({
-    mutationFn: async ({ current, input, file }: SaveServiceArgs) => {
-      let uploaded: { path: string; url: string } | null = null;
-      try {
-        if (file) uploaded = await uploadProgrammingImage(file, "services");
-        const payload: ChurchServiceInput = {
-          ...input,
-          image_url: uploaded?.url ?? input.image_url,
-          image_path: uploaded?.path ?? input.image_path,
-        };
-        const saved = current
-          ? await updateChurchService(current.id, payload)
-          : await createChurchService(payload);
-        if (uploaded && current?.image_path && current.image_path !== uploaded.path) {
-          await removeProgrammingImage(current.image_path).catch(() => undefined);
-        }
-        return saved;
-      } catch (error) {
-        if (uploaded) await removeProgrammingImage(uploaded.path).catch(() => undefined);
-        throw error;
-      }
+    mutationFn: async ({ current, input }: SaveServiceArgs) => {
+      return current
+        ? await updateChurchService(current.id, input)
+        : await createChurchService(input);
     },
     onSuccess: async () => {
       setFeedback("Culto fixo salvo com sucesso.");
@@ -359,7 +342,7 @@ function AdminProgramming() {
               current={serviceDialog === "new" ? null : serviceDialog}
               saving={saveService.isPending}
               onCancel={() => setServiceDialog(null)}
-              onSubmit={(input, file) => saveService.mutate({ current: serviceDialog === "new" ? null : serviceDialog, input, file })}
+              onSubmit={(input) => saveService.mutate({ current: serviceDialog === "new" ? null : serviceDialog, input })}
             />
           </DialogContent>
         ) : null}
@@ -400,7 +383,7 @@ function EmptyState({ title, description }: { title: string; description: string
   );
 }
 
-function ServiceForm({ current, saving, onCancel, onSubmit }: { current: ChurchService | null; saving: boolean; onCancel: () => void; onSubmit: (input: ChurchServiceInput, file: File | null) => void }) {
+function ServiceForm({ current, saving, onCancel, onSubmit }: { current: ChurchService | null; saving: boolean; onCancel: () => void; onSubmit: (input: ChurchServiceInput) => void }) {
   const [title, setTitle] = useState(current?.title ?? "");
   const [category, setCategory] = useState(current?.category ?? "Culto");
   const [description, setDescription] = useState(current?.description ?? "");
@@ -410,7 +393,6 @@ function ServiceForm({ current, saving, onCancel, onSubmit }: { current: ChurchS
   const [dayOfMonth, setDayOfMonth] = useState(String(current?.day_of_month ?? 1));
   const [active, setActive] = useState(current?.active ?? true);
   const [sortOrder, setSortOrder] = useState(String(current?.sort_order ?? 10));
-  const [file, setFile] = useState<File | null>(null);
 
   const valid = title.trim() && category.trim() && description.trim() && time && (recurrence === "weekly" ? weekday !== "" : Number(dayOfMonth) >= 1 && Number(dayOfMonth) <= 31);
 
@@ -431,7 +413,7 @@ function ServiceForm({ current, saving, onCancel, onSubmit }: { current: ChurchS
         active,
         sort_order: Number(sortOrder) || 0,
         fallback_key: current?.fallback_key ?? null,
-      }, file);
+      });
     }}>
       <DialogHeader>
         <DialogTitle className="text-xl font-extrabold text-green-950">{current ? "Editar culto fixo" : "Novo culto fixo"}</DialogTitle>
@@ -468,16 +450,6 @@ function ServiceForm({ current, saving, onCancel, onSubmit }: { current: ChurchS
             <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-green-800" /> Ativo no site
           </label>
         </div>
-        <Field label="Foto">
-          <div className="rounded-xl border border-dashed border-border p-4">
-            {current ? <img src={getServiceImage(current)} alt="" className="mb-3 h-28 w-full rounded-lg object-cover" /> : null}
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-bold text-green-900">
-              <ImagePlus className="h-4 w-4" /> {file ? file.name : "Selecionar imagem"}
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-            </label>
-            <p className="mt-2 text-xs text-text-secondary">JPG, PNG ou WebP. Máximo de 5 MB.</p>
-          </div>
-        </Field>
       </div>
 
       <div className="mt-6 flex flex-col-reverse gap-2 border-t border-border pt-5 sm:flex-row sm:justify-end">
