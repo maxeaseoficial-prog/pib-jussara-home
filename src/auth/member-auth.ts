@@ -17,14 +17,14 @@ export function normalizeFullName(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
-function localPhoneDigits(value: string) {
-  const digits = value.replace(/\D/g, "");
+function localPhoneDigits(value: string | null | undefined) {
+  const digits = (value ?? "").replace(/\D/g, "");
   return digits.startsWith("55") && (digits.length === 12 || digits.length === 13)
     ? digits.slice(2)
     : digits;
 }
 
-export function formatBrazilianPhone(value: string) {
+export function formatBrazilianPhone(value: string | null | undefined) {
   const digits = localPhoneDigits(value).slice(0, 11);
   if (!digits) return "";
   if (digits.length < 3) return `(${digits}`;
@@ -38,7 +38,7 @@ export function formatBrazilianPhone(value: string) {
   return `(${areaCode}) ${firstGroup}${lastGroup ? `-${lastGroup}` : ""}`;
 }
 
-export function toCanonicalBrazilianPhone(value: string) {
+export function toCanonicalBrazilianPhone(value: string | null | undefined) {
   const digits = localPhoneDigits(value);
   return /^[1-9]\d{9,10}$/.test(digits) ? `+55${digits}` : null;
 }

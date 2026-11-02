@@ -147,7 +147,7 @@ function AdminMembers() {
                     <tr key={member.id} className="transition-colors hover:bg-surface-soft/55">
                       <td className="px-6 py-4 font-bold text-text-primary">{member.full_name}</td>
                       <td className="whitespace-nowrap px-6 py-4 text-text-secondary">
-                        {formatBrazilianPhone(member.phone) || member.phone}
+                        {formatBrazilianPhone(member.phone) || member.phone || "—"}
                       </td>
                       <td className="max-w-xs break-all px-6 py-4 text-text-secondary">
                         {member.email || "—"}
@@ -186,7 +186,7 @@ function AdminMembers() {
                       <div className="min-w-0">
                         <dt className="sr-only">Telefone</dt>
                         <dd className="break-words text-text-secondary">
-                          {formatBrazilianPhone(member.phone) || member.phone}
+                          {formatBrazilianPhone(member.phone) || member.phone || "—"}
                         </dd>
                       </div>
                     </div>

@@ -13,7 +13,7 @@ import {
 
 type MemberProfile = {
   full_name: string;
-  phone: string;
+  phone: string | null;
 };
 
 function fallbackProfile(user: User): MemberProfile {
