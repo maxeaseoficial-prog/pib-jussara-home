@@ -1,1 +1,2 @@
-project_id = "skhoyllvnprrgwtlsaig"
+# Local Supabase CLI identifier only. Remote credentials are supplied via environment variables.
+project_id = "pib-jussara-home"
