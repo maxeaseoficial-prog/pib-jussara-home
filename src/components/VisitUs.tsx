@@ -1,10 +1,30 @@
 import { ArrowRight, Mail, MapPin, Phone } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { churchConfig } from "@/data/church";
 import { useSiteSettings } from "@/site/useSiteSettings";
+import { loadPublicChurchServices, programmingQueryKeys } from "@/programming/programming-data";
+import { formatServiceRecurrence, formatServiceTime } from "@/programming/schedule";
 import { Reveal } from "./Reveal";
 
 export function VisitUs() {
   const { settings } = useSiteSettings();
+  const services = useQuery({
+    queryKey: programmingQueryKeys.publicServices,
+    queryFn: ({ signal }) => loadPublicChurchServices(signal),
+  });
+  const serviceSchedule = services.data?.length
+    ? services.data.map((service) => ({
+        key: service.id,
+        name: service.title,
+        detail: formatServiceRecurrence(service).replace(` · ${formatServiceTime(service.service_time)}`, ""),
+        time: formatServiceTime(service.service_time),
+      }))
+    : churchConfig.services.map((service) => ({
+        key: `${service.day}-${service.name}`,
+        name: service.name,
+        detail: service.day,
+        time: service.time,
+      }));
   const mapsQuery = settings.fullAddress || churchConfig.mapsQuery;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     mapsQuery,
@@ -56,17 +76,17 @@ export function VisitUs() {
             <div className="h-full rounded-3xl bg-green-900 p-8 text-white">
               <h3 className="eyebrow text-brand-lime">Horários dos cultos</h3>
               <ul className="mt-7 divide-y divide-white/10">
-                {churchConfig.services.map((s) => (
+                {serviceSchedule.map((service) => (
                   <li
-                    key={`${s.day}-${s.name}`}
+                    key={service.key}
                     className="flex items-baseline justify-between gap-4 py-4"
                   >
                     <span className="min-w-0">
-                      <span className="block text-sm font-bold">{s.name}</span>
-                      <span className="block text-xs text-white/60">{s.day}</span>
+                      <span className="block text-sm font-bold">{service.name}</span>
+                      <span className="block text-xs text-white/60">{service.detail}</span>
                     </span>
                     <span className="shrink-0 text-sm font-extrabold text-brand-lime">
-                      {s.time}
+                      {service.time}
                     </span>
                   </li>
                 ))}
