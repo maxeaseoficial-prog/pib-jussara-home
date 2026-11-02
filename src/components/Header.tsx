@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { ChevronDown, LoaderCircle, LogOut, Menu, UserRound, X } from "lucide-react";
-import logo from "@/assets/logo.png";
 import { navItems, churchConfig } from "@/data/church";
 import { useAuth } from "@/auth/useAuth";
 import { MemberAuthDialog } from "@/components/MemberAuthDialog";
@@ -170,7 +169,7 @@ export function Header() {
             aria-label="Ir para o início"
           >
             <img
-              src={logo}
+              src="/favicon.png"
               alt={`Logotipo da ${churchConfig.name}`}
               width={48}
               height={48}
