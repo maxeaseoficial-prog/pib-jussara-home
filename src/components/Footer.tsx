@@ -1,11 +1,28 @@
 import { Facebook, Instagram, Youtube, Mail, Phone, MapPin } from "lucide-react";
-import logo from "@/assets/logo.png";
+import { useQuery } from "@tanstack/react-query";
 import { churchConfig, navItems } from "@/data/church";
 import { useSiteSettings } from "@/site/useSiteSettings";
+import { loadPublicChurchServices, programmingQueryKeys } from "@/programming/programming-data";
+import { formatServiceRecurrence } from "@/programming/schedule";
 
 export function Footer() {
   const year = new Date().getFullYear();
   const { settings } = useSiteSettings();
+  const services = useQuery({
+    queryKey: programmingQueryKeys.publicServices,
+    queryFn: ({ signal }) => loadPublicChurchServices(signal),
+  });
+  const serviceSchedule = services.data?.length
+    ? services.data.map((service) => ({
+        key: service.id,
+        name: service.title,
+        detail: formatServiceRecurrence(service),
+      }))
+    : churchConfig.services.map((service) => ({
+        key: `${service.day}-${service.name}`,
+        name: service.name,
+        detail: `${service.day} · ${service.time}`,
+      }));
 
   return (
     <footer className="bg-green-950 text-white/70">
@@ -14,7 +31,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3">
               <img
-                src={logo}
+                src="/favicon.png"
                 alt={`Logotipo da ${churchConfig.name}`}
                 width={48}
                 height={48}
@@ -73,12 +90,10 @@ export function Footer() {
           <div>
             <h2 className="eyebrow text-white">Horários dos cultos</h2>
             <ul className="mt-6 space-y-3 text-sm">
-              {churchConfig.services.map((s) => (
-                <li key={`${s.day}-${s.name}`}>
-                  <span className="block text-white/90">{s.name}</span>
-                  <span className="text-white/55">
-                    {s.day} · {s.time}
-                  </span>
+              {serviceSchedule.map((service) => (
+                <li key={service.key}>
+                  <span className="block text-white/90">{service.name}</span>
+                  <span className="text-white/55">{service.detail}</span>
                 </li>
               ))}
             </ul>
