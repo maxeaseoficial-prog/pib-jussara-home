@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
@@ -127,6 +127,16 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
   const [notice, setNotice] = useState<Notice>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!open) return;
+    setMode("login");
+    setNotice(null);
+    setLoginErrors({});
+    setSignUpErrors({});
+    setLoginPassword("");
+    setSignUpValues((values) => ({ ...values, password: "", confirmPassword: "" }));
+  }, [open]);
+
   const changeMode = (nextMode: AuthMode) => {
     if (nextMode === "signup" && loginEmail) {
       setSignUpValues((values) => ({ ...values, email: loginEmail }));
@@ -248,7 +258,7 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
 
               <DialogHeader className="space-y-2 text-left">
                 <DialogTitle className="text-3xl font-extrabold tracking-[-0.025em] text-green-950 sm:text-4xl">
-                  {mode === "login" ? "Bem-vindo de volta" : "Crie sua conta"}
+                  {mode === "login" ? "Entrar na área de membro" : "Criar conta"}
                 </DialogTitle>
                 <DialogDescription className="max-w-[46ch] text-sm leading-6 text-text-secondary">
                   {mode === "login"
