@@ -20,7 +20,6 @@ import {
   loadAdminMembers,
   loadPersistentSiteSettings,
 } from "@/admin/admin-data";
-import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -89,7 +88,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: (() => void) | undefined 
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center gap-3">
-        <img src={logo} alt="" className="h-11 w-11 object-contain" width={44} height={44} />
+        <img src="/favicon.png" alt="" className="h-11 w-11 object-contain" width={44} height={44} />
         <span className="min-w-0">
           <span className="block truncate text-sm font-extrabold text-white">PIB Jussara</span>
           <span className="block text-xs text-white/52">Administração</span>
@@ -179,7 +178,7 @@ export function AdminShell() {
             aria-label="Visão geral do painel"
           >
             <img
-              src={logo}
+              src="/favicon.png"
               alt=""
               className="h-9 w-9 shrink-0 object-contain lg:hidden"
               width={36}
