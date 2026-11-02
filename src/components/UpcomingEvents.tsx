@@ -22,7 +22,7 @@ export function UpcomingEvents() {
     queryFn: ({ signal }) => loadPublicChurchServices(signal),
   });
 
-  const cards = services.data
+  const cards = services.data?.length
     ? services.data.map((service) => {
         const nextDate = nextServiceOccurrence(service);
         const badge = nextDate
@@ -96,6 +96,7 @@ export function UpcomingEvents() {
                       src={event.image}
                       alt={event.title}
                       loading="lazy"
+                      decoding="async"
                       width={1200}
                       height={800}
                       className="aspect-[4/3] w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
