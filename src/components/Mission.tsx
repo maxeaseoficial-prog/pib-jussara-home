@@ -1,8 +1,5 @@
 import { BookMarked } from "lucide-react";
-import missionChildrenBase64 from "@/assets/mission-children-base64.txt?raw";
 import { Reveal } from "./Reveal";
-
-const missionChildrenImage = `data:image/webp;base64,${missionChildrenBase64.trim()}`;
 
 export function Mission() {
   return (
@@ -20,7 +17,7 @@ export function Mission() {
             </div>
             <div className="min-h-56 overflow-hidden">
               <img
-                src={missionChildrenImage}
+                src="/mission-children.webp"
                 alt="Crianças da PIB Jussara reunidas no templo"
                 loading="lazy"
                 width={800}
