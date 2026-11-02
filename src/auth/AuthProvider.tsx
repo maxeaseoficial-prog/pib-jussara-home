@@ -14,7 +14,53 @@ import {
 type MemberProfile = {
   full_name: string;
   phone: string | null;
+  role: "member" | "admin" | null;
 };
+
+const PROFILE_CACHE_PREFIX = "pibjussara:profile:";
+
+function profileCacheKey(userId: string) {
+  return `${PROFILE_CACHE_PREFIX}${userId}`;
+}
+
+function readCachedProfile(userId: string): MemberProfile | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(profileCacheKey(userId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<MemberProfile>;
+    if (typeof parsed.full_name !== "string") return null;
+    if (parsed.phone !== null && typeof parsed.phone !== "string") return null;
+    if (parsed.role !== "admin" && parsed.role !== "member") return null;
+
+    return {
+      full_name: parsed.full_name,
+      phone: parsed.phone ?? null,
+      role: parsed.role,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function cacheProfile(userId: string, profile: MemberProfile) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(profileCacheKey(userId), JSON.stringify(profile));
+  } catch {
+    // Cache is an optimization only. Authentication must keep working without it.
+  }
+}
+
+function clearCachedProfile(userId?: string) {
+  if (typeof window === "undefined") return;
+  try {
+    if (userId) window.sessionStorage.removeItem(profileCacheKey(userId));
+  } catch {
+    // Ignore storage failures.
+  }
+}
 
 function fallbackProfile(user: User): MemberProfile {
   const metadataName =
@@ -25,18 +71,22 @@ function fallbackProfile(user: User): MemberProfile {
   const metadataPhone =
     typeof user.user_metadata["phone"] === "string" ? user.user_metadata["phone"] : "";
 
-  return { full_name: fallbackName, phone: metadataPhone };
+  return { full_name: fallbackName, phone: metadataPhone || null, role: null };
 }
 
-async function loadProfile(user: User, client: SupabaseClient): Promise<MemberProfile> {
+async function loadProfile(user: User, client: SupabaseClient): Promise<MemberProfile | null> {
   const { data, error } = await client
     .from("profiles")
-    .select("full_name, phone")
+    .select("full_name, phone, role")
     .eq("id", user.id)
     .maybeSingle<MemberProfile>();
 
-  if (error || !data) return fallbackProfile(user);
-  return data;
+  if (error || !data) return null;
+  return {
+    full_name: data.full_name,
+    phone: data.phone ?? null,
+    role: data.role === "admin" ? "admin" : "member",
+  };
 }
 
 async function getAvailableSupabase() {
@@ -55,42 +105,68 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let active = true;
     let unsubscribe: (() => void) | undefined;
+    let lastSyncedUserId: string | null = null;
+
+    const applySession = async (nextSession: Session | null, client: SupabaseClient) => {
+      if (!active) return;
+
+      setSession(nextSession);
+
+      if (!nextSession?.user) {
+        lastSyncedUserId = null;
+        setProfile(null);
+        setIsLoading(false);
+        return;
+      }
+
+      const user = nextSession.user;
+      const cached = readCachedProfile(user.id);
+
+      if (cached) {
+        setProfile(cached);
+        setIsLoading(false);
+      } else {
+        setProfile(fallbackProfile(user));
+        setIsLoading(false);
+      }
+
+      if (lastSyncedUserId === user.id && cached) return;
+      lastSyncedUserId = user.id;
+
+      const freshProfile = await loadProfile(user, client);
+      if (!active || !freshProfile) return;
+
+      cacheProfile(user.id, freshProfile);
+      setProfile(freshProfile);
+    };
 
     void getSupabase()
       .then(async (client) => {
-        if (!active || !client) return;
+        if (!active || !client) {
+          if (active) setIsLoading(false);
+          return;
+        }
 
-        const syncSession = async (nextSession: Session | null) => {
-          if (!active) return;
-          setSession(nextSession);
-
-          if (!nextSession?.user) {
-            setProfile(null);
-            return;
-          }
-
-          const nextProfile = await loadProfile(nextSession.user, client);
-          if (active) setProfile(nextProfile);
-        };
+        const { data } = await client.auth.getSession();
+        await applySession(data.session, client);
 
         const {
           data: { subscription },
-        } = client.auth.onAuthStateChange((_event, nextSession) => {
-          void Promise.resolve().then(() => syncSession(nextSession));
+        } = client.auth.onAuthStateChange((event, nextSession) => {
+          if (event === "TOKEN_REFRESHED" && nextSession?.user.id === lastSyncedUserId) {
+            setSession(nextSession);
+            return;
+          }
+          void applySession(nextSession, client);
         });
         unsubscribe = () => subscription.unsubscribe();
-
-        const { data } = await client.auth.getSession();
-        await syncSession(data.session);
       })
       .catch(() => {
         if (active) {
           setSession(null);
           setProfile(null);
+          setIsLoading(false);
         }
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
       });
 
     return () => {
@@ -109,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       fullName: resolvedProfile.full_name,
       firstName: firstNameFrom(resolvedProfile.full_name),
       phone: resolvedProfile.phone || null,
+      role: resolvedProfile.role,
     };
   }, [profile, session]);
 
@@ -188,9 +265,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         try {
+          const currentUserId = session?.user.id;
           const { error } = await client.auth.signOut({ scope: "local" });
           if (error) return { ok: false, message: "Não foi possível sair. Tente novamente." };
 
+          clearCachedProfile(currentUserId);
           setSession(null);
           setProfile(null);
           return { ok: true };
@@ -199,7 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
     }),
-    [isLoading, member],
+    [isLoading, member, session],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

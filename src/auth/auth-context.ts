@@ -6,6 +6,7 @@ export type Member = {
   fullName: string;
   firstName: string;
   phone: string | null;
+  role: "member" | "admin" | null;
 };
 
 export type AuthActionResult =

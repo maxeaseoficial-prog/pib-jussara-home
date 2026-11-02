@@ -37,6 +37,23 @@ export function useAdminAccess() {
       };
     }
 
+    // The user's own profile is already protected by RLS and loaded by AuthProvider.
+    // Reuse its role instead of making a second sequential database request on every refresh.
+    if (member.role === "admin") {
+      setStatus("admin");
+      return () => {
+        active = false;
+      };
+    }
+
+    if (member.role === "member") {
+      setStatus("denied");
+      return () => {
+        active = false;
+      };
+    }
+
+    // Fallback only for the first uncached load or if the profile could not be read.
     setStatus("checking");
 
     void getSupabase()
