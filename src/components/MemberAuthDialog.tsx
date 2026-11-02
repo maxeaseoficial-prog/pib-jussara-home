@@ -2,7 +2,6 @@
 
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
-import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
 import {
   formatBrazilianPhone,
@@ -217,7 +216,7 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         closeLabel="Fechar"
-        className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[900px] gap-0 overflow-y-auto border-0 bg-surface p-0 shadow-[0_24px_80px_rgba(2,44,30,0.28)] sm:rounded-2xl"
+        className="max-h-[calc(100vh-2rem)] max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-[900px] gap-0 overflow-y-auto border-0 bg-surface p-0 shadow-[0_24px_80px_rgba(2,44,30,0.28)] sm:rounded-2xl"
       >
         <div className="grid min-h-[590px] lg:grid-cols-[0.82fr_1.18fr]">
           <div className="relative hidden overflow-hidden bg-green-950 px-10 py-12 text-white lg:flex lg:flex-col lg:justify-between">
@@ -226,7 +225,7 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
               aria-hidden="true"
             />
             <img
-              src={logo}
+              src="/favicon.png"
               alt=""
               width={72}
               height={72}
@@ -247,7 +246,7 @@ export function MemberAuthDialog({ open, onOpenChange }: MemberAuthDialogProps) 
             <div className="mx-auto w-full max-w-md">
               <div className="mb-8 flex items-center gap-3 lg:hidden">
                 <img
-                  src={logo}
+                  src="/favicon.png"
                   alt=""
                   width={48}
                   height={48}
