@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { ArrowLeft, Eye, EyeOff, LoaderCircle, LockKeyhole } from "lucide-react";
-import logo from "@/assets/logo.png";
 import { useAuth } from "@/auth/useAuth";
 import { Input } from "@/components/ui/input";
 
@@ -35,7 +34,7 @@ export function AdminLogin() {
     <main className="admin-auth min-h-screen bg-background lg:grid lg:grid-cols-[minmax(0,0.8fr)_minmax(32rem,1.2fr)]">
       <section className="relative hidden overflow-hidden bg-green-950 p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
         <a href="/" className="inline-flex w-fit items-center gap-3" aria-label="Voltar ao site">
-          <img src={logo} alt="" className="h-14 w-14 object-contain" width={56} height={56} />
+          <img src="/favicon.png" alt="" className="h-14 w-14 object-contain" width={56} height={56} />
           <span>
             <span className="block text-sm font-extrabold">PIB Jussara</span>
             <span className="block text-xs text-white/60">Primeira Igreja Batista</span>
@@ -65,7 +64,7 @@ export function AdminLogin() {
           </a>
 
           <div className="flex items-center gap-3 lg:hidden">
-            <img src={logo} alt="" className="h-12 w-12 object-contain" width={48} height={48} />
+            <img src="/favicon.png" alt="" className="h-12 w-12 object-contain" width={48} height={48} />
             <span className="text-sm font-extrabold text-green-950">PIB Jussara</span>
           </div>
 
